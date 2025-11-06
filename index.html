@@ -45,7 +45,13 @@
                                 <input type="password" id="apiKey" placeholder="paste-your-key-here">
                                 <button class="toggle-password" id="toggleApiKey" type="button">👁️</button>
                             </div>
-                            <span class="field-hint">Paste the API key provided by your administrator</span>
+                            <span class="field-hint">
+                                Paste the API key | 
+                                <button type="button" class="btn-link" id="showKeyInstructions">📖 How to get your key</button>
+                            </span>
+                            <div id="keyExpiration" class="key-expiration" style="display: none;">
+                                ⏰ Key expires in: <span id="keyTimer">30:00</span>
+                            </div>
                             <div class="button-group">
                                 <button id="saveKey" class="btn btn-primary">Save Key</button>
                                 <button id="clearKey" class="btn btn-secondary-small">Clear</button>
@@ -86,8 +92,8 @@
                 <nav class="tabs">
                     <button class="tab-btn active" data-tab="subscriptions">📋 All Subscriptions</button>
                     <button class="tab-btn" data-tab="create">➕ Create New</button>
+                    <button class="tab-btn" data-tab="wizard">🧙‍♂️ Add User Wizard</button>
                     <button class="tab-btn" data-tab="search">🔍 Search</button>
-                    <button class="tab-btn" data-tab="history">📜 History</button>
                 </nav>
 
                 <!-- Subscriptions Tab -->
@@ -97,9 +103,16 @@
                         <button id="refreshSubscriptions" class="btn btn-primary">🔄 Refresh</button>
                     </div>
                     <div class="info-card">
-                        <h4>📘 What does this do?</h4>
-                        <p>This shows all subscriptions in your workspace. Each card represents a customer's active, expired, or archived subscription.</p>
-                        <p><strong>Click any card</strong> to view details, update, or change the subscription status.</p>
+                        <h4>📘 Understanding Plans vs Subscriptions</h4>
+                        <p><strong>📦 Plans (Yellow Cards)</strong> - These are subscription packages/templates you can assign. They define what features customers get.</p>
+                        <p><strong>🏢 Subscriptions (White Cards)</strong> - These are actual subscriptions assigned to companies. You can edit, archive, or activate these.</p>
+                        <div style="margin-top: 12px; padding: 12px; background: #f0f9ff; border-radius: 6px; border-left: 3px solid #0284c7;">
+                            <strong>💡 Quick Actions:</strong><br>
+                            • <strong>Copy Plan ID:</strong> Click on any yellow plan card's Plan ID<br>
+                            • <strong>Copy Company ID:</strong> Click on any subscription's Company ID<br>
+                            • <strong>View Details:</strong> Click anywhere on a card<br>
+                            • <strong>Edit Subscriptions:</strong> Click a company subscription, then "Edit Details"
+                        </div>
                     </div>
                     <div id="subscriptionsList" class="subscriptions-list">
                         <p class="loading">Complete the setup in the sidebar, then click "Refresh" to load subscriptions</p>
@@ -113,27 +126,59 @@
                     </div>
                     
                     <div class="info-card">
-                        <h4>📘 What does this do?</h4>
-                        <p>This creates a new subscription for a customer, giving them access to your services for a specific period of time.</p>
-                        <div class="example-box">
-                            <strong>Example scenario:</strong> Sarah from "Acme Corp" wants a 1-year premium subscription
-                            <ul>
-                                <li>Plan ID: <code>premium-plan</code> (the subscription package)</li>
-                                <li>Company ID: <code>acme-corp-uuid</code> or <code>12345</code> (the customer's unique identifier)</li>
-                                <li>Duration: <code>365</code> days (1 year)</li>
-                            </ul>
+                        <h4>📘 IMPORTANT: Plans vs Company Subscriptions</h4>
+                        
+                        <div class="example-box" style="background: #fff3cd; border-left-color: #ffc107;">
+                            <strong>⚠️ What This Form Does:</strong>
+                            <p style="margin: 8px 0;"><strong>This creates a COMPANY SUBSCRIPTION</strong> - assigning an existing plan to a specific company.</p>
+                            <p style="margin: 8px 0; padding: 8px; background: white; border-radius: 4px;">
+                                <strong>📦 Plan</strong> = Template defining features (yellow cards in "All Subscriptions")<br>
+                                <strong>🏢 Company Subscription</strong> = Plan assigned to a specific company (white cards)
+                            </p>
+                        </div>
+                        
+                        <div class="example-box" style="margin-top: 12px;">
+                            <strong>✅ Correct Workflow:</strong>
+                            <ol style="margin: 8px 0; padding-left: 24px;">
+                                <li>Go to "📋 All Subscriptions" tab → Find a <strong>plan</strong> (yellow card)</li>
+                                <li>Click the Plan ID to copy it (e.g., "MatApiTest")</li>
+                                <li>Come back here and <strong>paste</strong> it in the "Plan ID" field below</li>
+                                <li>Enter the <strong>Company ID</strong> (who gets access)</li>
+                                <li>Set duration → Create!</li>
+                            </ol>
+                            <p style="margin-top: 8px; color: #059669; font-weight: 600;">
+                                → This assigns the plan to that company = they now have access!
+                            </p>
+                        </div>
+                        
+                        <div class="example-box" style="margin-top: 12px; background: #fee2e2; border-left-color: #ef4444;">
+                            <strong>❌ Common Mistake:</strong>
+                            <p style="margin: 4px 0;">If you enter a NEW plan name (that doesn't exist yet), you'll create a new PLAN TEMPLATE, not a company subscription!</p>
+                            <p style="margin: 4px 0; font-weight: 600;">Always copy an existing Plan ID from the "All Subscriptions" tab!</p>
                         </div>
                     </div>
                     
                     <form id="createSubscriptionForm" class="form">
                         <div class="form-group">
-                            <label for="planId">
-                                Plan ID
-                                <span class="help-icon" data-tooltip="The subscription package identifier (e.g., 'basic-plan', 'premium-monthly'). This determines what features the customer gets.">?</span>
+                            <label for="displayName">
+                                Display Name (Friendly Name)
+                                <span class="help-icon" data-tooltip="A human-readable name for this subscription. Example: 'Acme Corp Premium Plan' or 'Test Company - Annual Subscription'">?</span>
                                 <span class="required">*</span>
                             </label>
-                            <input type="text" id="planId" placeholder="e.g., premium-plan or basic-monthly" required>
-                            <span class="field-hint">The subscription package you're assigning (like "basic", "premium", etc.)</span>
+                            <input type="text" id="displayName" placeholder="e.g., Acme Corp - Premium Plan" required>
+                            <span class="field-hint">A friendly name to help you identify this subscription (e.g., "Customer Name - Plan Type")</span>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="planId">
+                                Plan ID (Must Be Existing Plan!)
+                                <span class="help-icon" data-tooltip="MUST be an existing plan ID from your system. Go to 'All Subscriptions' tab and click a Plan ID from the yellow cards to copy it.">?</span>
+                                <span class="required">*</span>
+                            </label>
+                            <input type="text" id="planId" placeholder="Paste Plan ID here (copy from yellow card in All Subscriptions tab)" required>
+                            <span class="field-hint" style="background: #fff3cd; padding: 6px; border-radius: 4px; margin-top: 4px; display: block;">
+                                ⚠️ <strong>MUST copy from existing plan!</strong> Go to "📋 All Subscriptions" → Click a yellow plan card's Plan ID → Paste here
+                            </span>
                         </div>
                         
                         <div class="form-group">
@@ -149,7 +194,9 @@
                                 </button>
                             </div>
                             <span class="field-hint">
-                                <strong>Not an email!</strong> This is a unique ID like: <code>acme-corp-123</code>, <code>12345</code>, or a UUID
+                                <strong>💡 Getting a Company ID:</strong><br>
+                                • <strong>New customer?</strong> Click "🎲 Generate" for a new UUID<br>
+                                • <strong>Existing customer?</strong> Go to "📋 All Subscriptions" tab and <strong>click on their Company ID</strong> to copy it<br>
                                 <button type="button" class="btn-link" id="showUUIDInfo">What's a UUID?</button>
                             </span>
                         </div>
@@ -175,6 +222,114 @@
                             <button type="reset" class="btn btn-secondary">Clear Form</button>
                         </div>
                     </form>
+                </div>
+
+                <!-- Add User Wizard Tab -->
+                <div id="wizard" class="tab-content">
+                    <div class="section-header">
+                        <h2>🧙‍♂️ Add New User (Admin Wizard)</h2>
+                    </div>
+                    
+                    <div class="info-card">
+                        <h4>📘 What does this wizard do?</h4>
+                        <p><strong>This helps you quickly set up a new user with a subscription.</strong></p>
+                        <p>You provide their name, email, and company - the wizard will:</p>
+                        <ul>
+                            <li>Generate a unique Company ID for them</li>
+                            <li>Create the subscription</li>
+                            <li>Generate an email you can send to notify them</li>
+                        </ul>
+                        <p style="margin-top: 8px;"><strong>Note:</strong> You still need to create their login account separately in your user management system!</p>
+                    </div>
+                    
+                    <form id="wizardForm" class="form">
+                        <div class="form-group">
+                            <label for="wizardName">
+                                Person's Full Name
+                                <span class="help-icon" data-tooltip="The person's full name (e.g., 'Sarah Johnson'). Used in the email template.">?</span>
+                                <span class="required">*</span>
+                            </label>
+                            <input type="text" id="wizardName" placeholder="e.g., Sarah Johnson" required>
+                            <span class="field-hint">Their full name - will be used in the welcome email</span>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="wizardEmail">
+                                Person's Email Address
+                                <span class="help-icon" data-tooltip="Their email address. Used for the welcome email and to track who this subscription is for.">?</span>
+                                <span class="required">*</span>
+                            </label>
+                            <input type="email" id="wizardEmail" placeholder="e.g., sarah@acmecorp.com" required>
+                            <span class="field-hint">The email where they'll receive access instructions</span>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="wizardCompanyName">
+                                Company Name
+                                <span class="help-icon" data-tooltip="The name of their company or organization (e.g., 'Acme Corporation'). Used to generate the Company ID.">?</span>
+                                <span class="required">*</span>
+                            </label>
+                            <input type="text" id="wizardCompanyName" placeholder="e.g., Acme Corporation" required>
+                            <span class="field-hint">Their company or organization name</span>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="wizardPlanId">
+                                Plan to Assign
+                                <span class="help-icon" data-tooltip="Which subscription plan/package to give them. This determines what features they'll have access to.">?</span>
+                                <span class="required">*</span>
+                            </label>
+                            <input type="text" id="wizardPlanId" placeholder="e.g., MatApiMarineStreamTest001" required>
+                            <span class="field-hint">The plan ID from the "All Subscriptions" tab</span>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="wizardDuration">
+                                Duration (Days)
+                                <span class="help-icon" data-tooltip="How long they'll have access. 365 days = 1 year.">?</span>
+                                <span class="required">*</span>
+                            </label>
+                            <input type="number" id="wizardDuration" min="1" value="365" required>
+                            <div class="quick-duration">
+                                <span class="field-hint">Quick select:</span>
+                                <button type="button" class="btn-duration" data-target="wizardDuration" data-days="30">1 Month</button>
+                                <button type="button" class="btn-duration" data-target="wizardDuration" data-days="90">3 Months</button>
+                                <button type="button" class="btn-duration" data-target="wizardDuration" data-days="365">1 Year</button>
+                                <button type="button" class="btn-duration" data-target="wizardDuration" data-days="730">2 Years</button>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="wizardWorkflows">
+                                Visible Workflows (Optional)
+                                <span class="help-icon" data-tooltip="Specific workflows this user can access. Leave empty to allow all workflows from the plan. Enter workflow IDs separated by commas.">?</span>
+                            </label>
+                            <textarea id="wizardWorkflows" rows="3" placeholder="workflow-id-1, workflow-id-2, workflow-id-3"></textarea>
+                            <span class="field-hint">💡 Optional: Enter specific workflow IDs (comma-separated). Leave blank for all workflows.</span>
+                        </div>
+                        
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary btn-large">🚀 Create User Subscription</button>
+                            <button type="reset" class="btn btn-secondary">Clear Form</button>
+                        </div>
+                    </form>
+                    
+                    <!-- Results Section -->
+                    <div id="wizardResults" class="wizard-results" style="display: none;">
+                        <div class="info-card" style="background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%); border-left-color: #10b981;">
+                            <h4>✅ Subscription Created Successfully!</h4>
+                            <p><strong>Company ID Created:</strong> <code id="wizardCompanyId"></code></p>
+                            <p><strong>Display Name:</strong> <span id="wizardDisplayNameResult"></span></p>
+                        </div>
+                        
+                        <div class="email-template">
+                            <h4>📧 Email Template (Copy & Send to User)</h4>
+                            <div class="email-preview" id="emailPreview"></div>
+                            <button type="button" class="btn btn-primary" id="copyEmail">📋 Copy Email to Clipboard</button>
+                        </div>
+                        
+                        <button type="button" class="btn btn-secondary" id="wizardCreateAnother">+ Create Another User</button>
+                    </div>
                 </div>
 
                 <!-- Search & Filter Tab -->
@@ -253,23 +408,7 @@
                     </div>
                 </div>
 
-                <!-- History Tab -->
-                <div id="history" class="tab-content">
-                    <div class="section-header">
-                        <h2>Subscription History</h2>
-                        <button id="refreshHistory" class="btn btn-primary">🔄 Refresh</button>
-                    </div>
-                    
-                    <div class="info-card">
-                        <h4>📜 What is this?</h4>
-                        <p>This shows a log of recent actions and changes to subscriptions in your workspace.</p>
-                        <p>You'll see things like: subscriptions created, updated, activated, or archived.</p>
-                    </div>
-                    
-                    <div id="historyList" class="history-list">
-                        <p class="info">Click "Refresh" to load recent subscription activity</p>
-                    </div>
-                </div>
+                <!-- History Tab - Removed: API doesn't support audit logs -->
             </main>
         </div>
 
@@ -372,16 +511,76 @@
                         <code style="display: block; padding: 10px; background: #f5f5f5; margin: 10px 0;">550e8400-e29b-41d4-a716-446655440000</code>
                     </div>
                     
-                    <h4>When to use a UUID vs other IDs:</h4>
+                    <h4>How to get a Company ID:</h4>
                     <ul>
-                        <li><strong>UUID:</strong> Best for new customers - click "Generate" to create one automatically</li>
-                        <li><strong>Simple number:</strong> Like <code>12345</code> - if your system uses simple numbers</li>
-                        <li><strong>Text code:</strong> Like <code>acme-corp</code> - if you use company name codes</li>
+                        <li><strong>New Customer:</strong> Click the "🎲 Generate" button to create a new UUID automatically</li>
+                        <li><strong>Existing Customer:</strong> Go to "📋 All Subscriptions" tab and click on their Company ID field to copy it - then paste it when creating their new subscription</li>
+                        <li><strong>Custom ID:</strong> You can also use your own format like <code>acme-corp-123</code> or <code>12345</code></li>
                     </ul>
                     
-                    <p><strong>💡 Tip:</strong> When creating a new subscription for a brand new customer, use the "Generate" button to create a UUID automatically!</p>
+                    <p><strong>💡 Pro Tip:</strong> Company IDs in the subscription list are clickable - just click to copy them! This makes it easy to create additional subscriptions for the same company.</p>
                 </div>
                 <button class="btn btn-primary" onclick="document.getElementById('uuidInfoModal').style.display='none'">Got it!</button>
+            </div>
+        </div>
+        
+        <!-- API Key Instructions Modal -->
+        <div id="keyInstructionsModal" class="modal">
+            <div class="modal-content" style="max-width: 800px;">
+                <span class="close">&times;</span>
+                <h2>🔑 How to Get Your API Access Key</h2>
+                
+                <div class="info-card">
+                    <h4>📋 Step-by-Step Instructions (Chrome)</h4>
+                    <ol style="line-height: 2; font-size: 14px;">
+                        <li><strong>Login to MarineStream:</strong>
+                            <br>Go to <code style="background: #f5f5f5; padding: 2px 6px;">app.marinestream.io</code> and log in with your credentials
+                        </li>
+                        <li><strong>Open a Work Item:</strong>
+                            <br>Click on any work item to open it
+                        </li>
+                        <li><strong>Open Chrome DevTools:</strong>
+                            <br>Press <kbd style="background: #e5e7eb; padding: 2px 8px; border-radius: 3px; border: 1px solid #ccc;">F12</kbd> or right-click and select "Inspect"
+                        </li>
+                        <li><strong>Go to Network Tab:</strong>
+                            <br>Click the "Network" tab at the top of DevTools
+                        </li>
+                        <li><strong>Filter for 'work':</strong>
+                            <br>In the filter box, type: <code>work</code>
+                        </li>
+                        <li><strong>Refresh the Page:</strong>
+                            <br>Press <kbd style="background: #e5e7eb; padding: 2px 8px; border-radius: 3px; border: 1px solid #ccc;">F5</kbd> or click the refresh button
+                        </li>
+                        <li><strong>Find the Request:</strong>
+                            <br>Look for a request with a <strong>random number/ID without a gear icon</strong> next to it
+                            <br><span style="color: #64748b; font-size: 13px;">Example: "90b667d2-7f5a-450e-b18c-fa0f124a72ac"</span>
+                        </li>
+                        <li><strong>Open Headers Tab:</strong>
+                            <br>Click on that request, then click the "Headers" tab on the right panel
+                        </li>
+                        <li><strong>Scroll to Request Headers:</strong>
+                            <br>Scroll down to find the "Request Headers" section
+                        </li>
+                        <li><strong>Copy the Bearer Token:</strong>
+                            <br>Find the line that says <code>Authorization: Bearer ey...</code>
+                            <br>Copy <strong>ONLY the part after "Bearer "</strong> (the long text starting with "ey")
+                            <br><span style="color: #f97316; font-weight: 600;">⚠️ Don't copy the word "Bearer" - just the token!</span>
+                        </li>
+                        <li><strong>Paste Here:</strong>
+                            <br>Paste the token into the "Access Key" field above and click "Save Key"
+                        </li>
+                    </ol>
+                </div>
+                
+                <div class="example-box" style="margin-top: 16px;">
+                    <strong>✅ What you should copy:</strong>
+                    <pre style="background: #d1fae5; padding: 12px; border-radius: 6px; overflow-x: auto; font-size: 12px; border: 1px solid #10b981;">eyJhbGciOiJSUzI1NiIsImtpZCI6IkM3RjdEMkM0...</pre>
+                    
+                    <strong style="margin-top: 12px; display: block;">❌ What NOT to copy:</strong>
+                    <pre style="background: #fee2e2; padding: 12px; border-radius: 6px; overflow-x: auto; font-size: 12px; border: 1px solid #ef4444;">Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6IkM3RjdEMkM0...</pre>
+                </div>
+                
+                <button class="btn btn-primary" onclick="document.getElementById('keyInstructionsModal').style.display='none'">Got it!</button>
             </div>
         </div>
 

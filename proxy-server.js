@@ -13,7 +13,7 @@ const PORT = 3000;
 app.use(cors({
     origin: '*', // Allow all origins (change to specific origin in production)
     credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'environment', 'X-Requested-With']
 }));
 
@@ -24,18 +24,13 @@ app.use((req, res, next) => {
 });
 
 // Proxy all /api requests to the Rise-X API
-app.use('/api', createProxyMiddleware({
+app.use('/api', express.json(), createProxyMiddleware({
     target: 'https://api.idiana.io',
     changeOrigin: true,
     secure: true, // Verify SSL certificates
     // Don't rewrite path - forward as-is
     pathRewrite: {
         '^/api': '/api' // Keep the /api prefix (no change needed)
-    },
-    // Add headers to forwarded request
-    headers: {
-        'X-Forwarded-For': '127.0.0.1',
-        'X-Forwarded-Proto': 'http'
     },
     logLevel: 'debug', // Enable detailed logging
     onProxyReq: (proxyReq, req, res) => {
@@ -48,6 +43,17 @@ app.use('/api', createProxyMiddleware({
             'Content-Type': req.headers['content-type'] || 'Not set',
             'environment': req.headers.environment || 'Not set'
         });
+        
+        // Log body for POST/PUT/PATCH/DELETE requests (express.json() has already parsed it)
+        // http-proxy-middleware will handle re-streaming the body automatically
+        if (req.body && (req.method === 'POST' || req.method === 'PUT' || req.method === 'PATCH' || req.method === 'DELETE')) {
+            console.log(`   Request Body:`, req.body);
+            
+            // Fix content-length header for proxied request  
+            const bodyData = JSON.stringify(req.body);
+            proxyReq.setHeader('Content-Length', Buffer.byteLength(bodyData));
+            proxyReq.write(bodyData);
+        }
     },
     onProxyRes: (proxyRes, req, res) => {
         console.log(`\n📥 Proxy Response:`);
