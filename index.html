@@ -3,128 +3,274 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rise-X Subscription Management</title>
+    <title>MarineStream Subscription Management</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>Rise-X Subscription Management</h1>
-            <div class="auth-section">
-                <div class="api-key-input">
-                    <label for="apiKey">API Key:</label>
-                    <input type="password" id="apiKey" placeholder="Enter your API key from dev tools">
-                    <button id="saveKey" class="btn btn-primary">Save Key</button>
-                    <button id="clearKey" class="btn btn-secondary">Clear</button>
-                </div>
-                <div class="api-base-url">
-                    <label for="baseUrl">API Base URL:</label>
-                    <input type="text" id="baseUrl" placeholder="https://api.example.com" value="https://api.idiana.io">
-                    <button id="saveUrl" class="btn btn-secondary">Save URL</button>
-                    <p style="font-size: 0.8em; margin-top: 5px; color: rgba(255,255,255,0.8);">
-                        💡 CORS issue? Use proxy: <code style="background: rgba(0,0,0,0.3); padding: 2px 6px; border-radius: 3px;">http://localhost:3000</code> (no trailing slash!)
-                    </p>
-                </div>
-                <div class="api-ecosystem">
-                    <label for="ecosystem">Ecosystem:</label>
-                    <input type="text" id="ecosystem" placeholder="my-ecosystem">
-                    <button id="saveEcosystem" class="btn btn-secondary">Save</button>
-                </div>
+            <h1>MarineStream Subscription Management</h1>
+            <div class="connection-status" id="connectionStatus">
+                <span class="status-dot"></span>
+                <span class="status-text">Not Connected</span>
             </div>
         </header>
+        
+        <div class="main-layout">
+            <aside class="sidebar">
+                <div class="setup-section">
+                    <h3>Setup</h3>
+                    <div class="setup-progress" id="setupProgress">
+                        <div class="progress-item" data-step="key">
+                            <span class="progress-icon">1</span>
+                            <span class="progress-label">Access Key</span>
+                        </div>
+                        <div class="progress-item" data-step="url">
+                            <span class="progress-icon">2</span>
+                            <span class="progress-label">System Address</span>
+                        </div>
+                        <div class="progress-item" data-step="ecosystem">
+                            <span class="progress-icon">3</span>
+                            <span class="progress-label">Workspace</span>
+                        </div>
+                    </div>
+                    
+                    <div class="auth-section">
+                        <div class="form-field">
+                            <label for="apiKey">
+                                Access Key
+                                <span class="help-icon" data-tooltip="Your secret password to access the subscription system. Get this from your system administrator.">?</span>
+                            </label>
+                            <div class="input-with-action">
+                                <input type="password" id="apiKey" placeholder="paste-your-key-here">
+                                <button class="toggle-password" id="toggleApiKey" type="button">👁️</button>
+                            </div>
+                            <span class="field-hint">Paste the API key provided by your administrator</span>
+                            <div class="button-group">
+                                <button id="saveKey" class="btn btn-primary">Save Key</button>
+                                <button id="clearKey" class="btn btn-secondary-small">Clear</button>
+                            </div>
+                        </div>
+                        
+                        <div class="form-field">
+                            <label for="baseUrl">
+                                System Address
+                                <span class="help-icon" data-tooltip="The web address where the subscription system lives. Usually starts with https://api.">?</span>
+                            </label>
+                            <input type="text" id="baseUrl" placeholder="https://api.idiana.io" value="https://api.idiana.io">
+                            <span class="field-hint">Default: https://api.idiana.io</span>
+                            <button id="saveUrl" class="btn btn-primary">Save Address</button>
+                            <p class="info-note">
+                                💡 <strong>Connection blocked?</strong> Use proxy: <code>http://localhost:3000</code>
+                            </p>
+                        </div>
+                        
+                        <div class="form-field">
+                            <label for="ecosystem">
+                                Workspace Name
+                                <span class="help-icon" data-tooltip="Your specific workspace or environment name in the system (e.g., 'marinestream' or 'my-company')">?</span>
+                            </label>
+                            <input type="text" id="ecosystem" placeholder="e.g., marinestream">
+                            <span class="field-hint">Example: marinestream, production, my-workspace</span>
+                            <button id="saveEcosystem" class="btn btn-primary">Save Workspace</button>
+                        </div>
+                        
+                        <button id="testConnection" class="btn btn-test">
+                            🔌 Test Connection
+                        </button>
+                    </div>
+                </div>
+            </aside>
+            
+            <main class="main-content">
+                <nav class="tabs">
+                    <button class="tab-btn active" data-tab="subscriptions">📋 All Subscriptions</button>
+                    <button class="tab-btn" data-tab="create">➕ Create New</button>
+                    <button class="tab-btn" data-tab="search">🔍 Search</button>
+                    <button class="tab-btn" data-tab="history">📜 History</button>
+                </nav>
 
-        <nav class="tabs">
-            <button class="tab-btn active" data-tab="subscriptions">Subscriptions</button>
-            <button class="tab-btn" data-tab="create">Create Subscription</button>
-            <button class="tab-btn" data-tab="search">Search & Filter</button>
-            <button class="tab-btn" data-tab="history">History</button>
-        </nav>
+                <!-- Subscriptions Tab -->
+                <div id="subscriptions" class="tab-content active">
+                    <div class="section-header">
+                        <h2>All Subscriptions</h2>
+                        <button id="refreshSubscriptions" class="btn btn-primary">🔄 Refresh</button>
+                    </div>
+                    <div class="info-card">
+                        <h4>📘 What does this do?</h4>
+                        <p>This shows all subscriptions in your workspace. Each card represents a customer's active, expired, or archived subscription.</p>
+                        <p><strong>Click any card</strong> to view details, update, or change the subscription status.</p>
+                    </div>
+                    <div id="subscriptionsList" class="subscriptions-list">
+                        <p class="loading">Complete the setup in the sidebar, then click "Refresh" to load subscriptions</p>
+                    </div>
+                </div>
 
-        <!-- Subscriptions Tab -->
-        <div id="subscriptions" class="tab-content active">
-            <div class="section-header">
-                <h2>All Subscriptions</h2>
-                <button id="refreshSubscriptions" class="btn btn-primary">Refresh</button>
-            </div>
-            <div id="subscriptionsList" class="subscriptions-list">
-                <p class="loading">Enter your API key and click "Refresh" to load subscriptions</p>
-            </div>
-        </div>
+                <!-- Create Subscription Tab -->
+                <div id="create" class="tab-content">
+                    <div class="section-header">
+                        <h2>Create New Subscription</h2>
+                    </div>
+                    
+                    <div class="info-card">
+                        <h4>📘 What does this do?</h4>
+                        <p>This creates a new subscription for a customer, giving them access to your services for a specific period of time.</p>
+                        <div class="example-box">
+                            <strong>Example scenario:</strong> Sarah from "Acme Corp" wants a 1-year premium subscription
+                            <ul>
+                                <li>Plan ID: <code>premium-plan</code> (the subscription package)</li>
+                                <li>Company ID: <code>acme-corp-uuid</code> or <code>12345</code> (the customer's unique identifier)</li>
+                                <li>Duration: <code>365</code> days (1 year)</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <form id="createSubscriptionForm" class="form">
+                        <div class="form-group">
+                            <label for="planId">
+                                Plan ID
+                                <span class="help-icon" data-tooltip="The subscription package identifier (e.g., 'basic-plan', 'premium-monthly'). This determines what features the customer gets.">?</span>
+                                <span class="required">*</span>
+                            </label>
+                            <input type="text" id="planId" placeholder="e.g., premium-plan or basic-monthly" required>
+                            <span class="field-hint">The subscription package you're assigning (like "basic", "premium", etc.)</span>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="companyId">
+                                Company ID (Customer Identifier)
+                                <span class="help-icon" data-tooltip="The unique identifier for this customer. Could be a UUID (e.g., '550e8400-e29b-41d4-a716-446655440000'), a number (e.g., '12345'), or a text code (e.g., 'acme-corp'). NOT an email address.">?</span>
+                                <span class="required">*</span>
+                            </label>
+                            <div class="input-with-action">
+                                <input type="text" id="companyId" placeholder="e.g., 550e8400-e29b-41d4-a716-446655440000" required>
+                                <button type="button" id="generateUUID" class="btn-icon" title="Generate new UUID">
+                                    🎲 Generate
+                                </button>
+                            </div>
+                            <span class="field-hint">
+                                <strong>Not an email!</strong> This is a unique ID like: <code>acme-corp-123</code>, <code>12345</code>, or a UUID
+                                <button type="button" class="btn-link" id="showUUIDInfo">What's a UUID?</button>
+                            </span>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="durationDays">
+                                Duration (Days)
+                                <span class="help-icon" data-tooltip="How long the subscription will be valid. 365 days = 1 year, 30 days = 1 month.">?</span>
+                                <span class="required">*</span>
+                            </label>
+                            <input type="number" id="durationDays" min="1" value="365" required>
+                            <div class="quick-duration">
+                                <span class="field-hint">Quick select:</span>
+                                <button type="button" class="btn-duration" data-days="30">1 Month (30 days)</button>
+                                <button type="button" class="btn-duration" data-days="90">3 Months (90 days)</button>
+                                <button type="button" class="btn-duration" data-days="365">1 Year (365 days)</button>
+                                <button type="button" class="btn-duration" data-days="730">2 Years (730 days)</button>
+                            </div>
+                        </div>
+                        
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary btn-large">✓ Create Subscription</button>
+                            <button type="reset" class="btn btn-secondary">Clear Form</button>
+                        </div>
+                    </form>
+                </div>
 
-        <!-- Create Subscription Tab -->
-        <div id="create" class="tab-content">
-            <div class="section-header">
-                <h2>Create New Subscription</h2>
-            </div>
-            <form id="createSubscriptionForm" class="form">
-                <div class="form-group">
-                    <label for="planId">Plan ID:</label>
-                    <input type="text" id="planId" required>
+                <!-- Search & Filter Tab -->
+                <div id="search" class="tab-content">
+                    <div class="section-header">
+                        <h2>Search & Filter Subscriptions</h2>
+                    </div>
+                    
+                    <div class="info-card">
+                        <h4>🔍 How to search</h4>
+                        <p>You can search by any combination of these fields. Leave fields blank to see everything!</p>
+                        <ul>
+                            <li><strong>Company ID</strong> - if you know the exact customer identifier</li>
+                            <li><strong>Company Name</strong> - if you only know their name</li>
+                            <li><strong>Plan ID</strong> - to find all customers on a specific plan</li>
+                            <li><strong>Status</strong> - to find all active, expired, or archived subscriptions</li>
+                            <li><strong>Date Range</strong> - to find subscriptions created in a specific time period</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="search-filters">
+                        <div class="form-group">
+                            <label for="searchCompanyId">
+                                Company ID
+                                <span class="help-icon" data-tooltip="Search for subscriptions by the customer's unique identifier">?</span>
+                            </label>
+                            <input type="text" id="searchCompanyId" placeholder="e.g., acme-corp-123">
+                        </div>
+                        <div class="form-group">
+                            <label for="searchCompanyName">
+                                Company Name
+                                <span class="help-icon" data-tooltip="Search by the customer's company name (if available in the system)">?</span>
+                            </label>
+                            <input type="text" id="searchCompanyName" placeholder="e.g., Acme Corporation">
+                        </div>
+                        <div class="form-group">
+                            <label for="searchPlanId">
+                                Plan ID
+                                <span class="help-icon" data-tooltip="Find all subscriptions using a specific plan (e.g., all 'premium' customers)">?</span>
+                            </label>
+                            <input type="text" id="searchPlanId" placeholder="e.g., premium-plan">
+                        </div>
+                        <div class="form-group">
+                            <label for="searchStatus">
+                                Status
+                                <span class="help-icon" data-tooltip="Filter by subscription status: Active = currently working, Expired = time ran out, Archived = manually disabled">?</span>
+                            </label>
+                            <select id="searchStatus">
+                                <option value="">All Statuses</option>
+                                <option value="Active">✓ Active (Currently Working)</option>
+                                <option value="Archived">📦 Archived (Disabled)</option>
+                                <option value="Expired">⏰ Expired (Time Ran Out)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="searchDateFrom">
+                                Date From
+                                <span class="help-icon" data-tooltip="Show subscriptions created on or after this date">?</span>
+                            </label>
+                            <input type="date" id="searchDateFrom">
+                        </div>
+                        <div class="form-group">
+                            <label for="searchDateTo">
+                                Date To
+                                <span class="help-icon" data-tooltip="Show subscriptions created on or before this date">?</span>
+                            </label>
+                            <input type="date" id="searchDateTo">
+                        </div>
+                        <div class="form-group filter-actions">
+                            <button id="applyFilters" class="btn btn-primary">🔍 Search</button>
+                            <button id="clearFilters" class="btn btn-secondary">✕ Clear All</button>
+                        </div>
+                    </div>
+                    <div id="filteredResults" class="subscriptions-list">
+                        <p class="info">👆 Use the filters above to search for specific subscriptions</p>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label for="companyId">Company ID:</label>
-                    <input type="text" id="companyId" required>
-                </div>
-                <div class="form-group">
-                    <label for="durationDays">Duration (Days):</label>
-                    <input type="number" id="durationDays" min="1" value="365" required>
-                </div>
-                <button type="submit" class="btn btn-primary">Create Subscription</button>
-            </form>
-        </div>
 
-        <!-- Search & Filter Tab -->
-        <div id="search" class="tab-content">
-            <div class="section-header">
-                <h2>Search & Filter Subscriptions</h2>
-            </div>
-            <div class="search-filters">
-                <div class="form-group">
-                    <label for="searchCompanyId">Company ID:</label>
-                    <input type="text" id="searchCompanyId" placeholder="Filter by company ID">
+                <!-- History Tab -->
+                <div id="history" class="tab-content">
+                    <div class="section-header">
+                        <h2>Subscription History</h2>
+                        <button id="refreshHistory" class="btn btn-primary">🔄 Refresh</button>
+                    </div>
+                    
+                    <div class="info-card">
+                        <h4>📜 What is this?</h4>
+                        <p>This shows a log of recent actions and changes to subscriptions in your workspace.</p>
+                        <p>You'll see things like: subscriptions created, updated, activated, or archived.</p>
+                    </div>
+                    
+                    <div id="historyList" class="history-list">
+                        <p class="info">Click "Refresh" to load recent subscription activity</p>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label for="searchCompanyName">Company Name:</label>
-                    <input type="text" id="searchCompanyName" placeholder="Filter by company name">
-                </div>
-                <div class="form-group">
-                    <label for="searchPlanId">Plan ID:</label>
-                    <input type="text" id="searchPlanId" placeholder="Filter by plan ID">
-                </div>
-                <div class="form-group">
-                    <label for="searchStatus">Status:</label>
-                    <select id="searchStatus">
-                        <option value="">All Statuses</option>
-                        <option value="Active">Active</option>
-                        <option value="Archived">Archived</option>
-                        <option value="Expired">Expired</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="searchDateFrom">Date From:</label>
-                    <input type="date" id="searchDateFrom">
-                </div>
-                <div class="form-group">
-                    <label for="searchDateTo">Date To:</label>
-                    <input type="date" id="searchDateTo">
-                </div>
-                <button id="applyFilters" class="btn btn-primary">Apply Filters</button>
-                <button id="clearFilters" class="btn btn-secondary">Clear Filters</button>
-            </div>
-            <div id="filteredResults" class="subscriptions-list">
-                <p class="info">Use filters above to search subscriptions</p>
-            </div>
-        </div>
-
-        <!-- History Tab -->
-        <div id="history" class="tab-content">
-            <div class="section-header">
-                <h2>Subscription History</h2>
-                <button id="refreshHistory" class="btn btn-primary">Refresh</button>
-            </div>
-            <div id="historyList" class="history-list">
-                <p class="info">History will appear here</p>
-            </div>
+            </main>
         </div>
 
         <!-- Subscription Detail Modal -->
@@ -134,10 +280,15 @@
                 <h2 id="modalTitle">Subscription Details</h2>
                 <div id="modalBody"></div>
                 <div class="modal-actions">
-                    <button id="updateSubscription" class="btn btn-primary">Update</button>
-                    <button id="cancelSubscription" class="btn btn-danger">Cancel Subscription</button>
-                    <button id="activateSubscription" class="btn btn-success">Activate</button>
-                    <button id="pauseSubscription" class="btn btn-warning">Pause</button>
+                    <button id="updateSubscription" class="btn btn-primary" title="Modify subscription dates, plan, or status">
+                        ✏️ Edit Details
+                    </button>
+                    <button id="cancelSubscription" class="btn btn-danger" title="Disable this subscription immediately - customer will lose access">
+                        🚫 Archive Subscription
+                    </button>
+                    <button id="activateSubscription" class="btn btn-success" title="Re-enable this subscription - customer will regain access">
+                        ✓ Activate
+                    </button>
                 </div>
             </div>
         </div>
@@ -146,35 +297,91 @@
         <div id="updateModal" class="modal">
             <div class="modal-content">
                 <span class="close">&times;</span>
-                <h2>Update Subscription</h2>
+                <h2>Edit Subscription</h2>
+                
+                <div class="info-card">
+                    <h4>✏️ What can you change?</h4>
+                    <p><strong>Plan ID:</strong> Switch the customer to a different subscription package</p>
+                    <p><strong>Start/End Dates:</strong> Extend or shorten the subscription period</p>
+                    <p><strong>Status:</strong> Manually set to Active, Archived, or Expired</p>
+                    <p><strong>Metadata:</strong> Advanced - add custom data in JSON format (optional)</p>
+                </div>
+                
                 <form id="updateSubscriptionForm" class="form">
                     <input type="hidden" id="updateSubscriptionId">
                     <div class="form-group">
-                        <label for="updatePlanId">Plan ID:</label>
-                        <input type="text" id="updatePlanId">
+                        <label for="updatePlanId">
+                            Plan ID
+                            <span class="help-icon" data-tooltip="Change the subscription package (e.g., upgrade from 'basic' to 'premium')">?</span>
+                        </label>
+                        <input type="text" id="updatePlanId" placeholder="e.g., premium-plan">
                     </div>
                     <div class="form-group">
-                        <label for="updateStartDate">Start Date:</label>
+                        <label for="updateStartDate">
+                            Start Date
+                            <span class="help-icon" data-tooltip="When the subscription begins. Usually don't change this unless correcting an error.">?</span>
+                        </label>
                         <input type="date" id="updateStartDate">
                     </div>
                     <div class="form-group">
-                        <label for="updateEndDate">End Date:</label>
+                        <label for="updateEndDate">
+                            End Date
+                            <span class="help-icon" data-tooltip="When the subscription expires. Extend this to give the customer more time.">?</span>
+                        </label>
                         <input type="date" id="updateEndDate">
+                        <span class="field-hint">💡 Tip: Extend this date to give the customer more access time</span>
                     </div>
                     <div class="form-group">
-                        <label for="updateStatus">Status:</label>
+                        <label for="updateStatus">
+                            Status
+                            <span class="help-icon" data-tooltip="Active = working normally, Archived = disabled by you, Expired = time ran out">?</span>
+                        </label>
                         <select id="updateStatus">
-                            <option value="Active">Active</option>
-                            <option value="Archived">Archived</option>
-                            <option value="Expired">Expired</option>
+                            <option value="Active">✓ Active (Working)</option>
+                            <option value="Archived">📦 Archived (Disabled)</option>
+                            <option value="Expired">⏰ Expired (Time Ran Out)</option>
                         </select>
                     </div>
                     <div class="form-group">
-                        <label for="updateMetadata">Metadata (JSON):</label>
-                        <textarea id="updateMetadata" rows="4"></textarea>
+                        <label for="updateMetadata">
+                            Metadata (Advanced - Optional)
+                            <span class="help-icon" data-tooltip="Custom data in JSON format. Only use if you know what you're doing. Example: {&quot;notes&quot;: &quot;VIP customer&quot;}">?</span>
+                        </label>
+                        <textarea id="updateMetadata" rows="4" placeholder='{"customField": "value"}'></textarea>
+                        <span class="field-hint">⚠️ Advanced: Must be valid JSON format. Leave blank if unsure.</span>
                     </div>
-                    <button type="submit" class="btn btn-primary">Update Subscription</button>
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary btn-large">✓ Save Changes</button>
+                        <button type="button" class="btn btn-secondary" onclick="document.getElementById('updateModal').style.display='none'">Cancel</button>
+                    </div>
                 </form>
+            </div>
+        </div>
+        
+        <!-- UUID Info Modal -->
+        <div id="uuidInfoModal" class="modal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <h2>What's a UUID?</h2>
+                <div class="info-card">
+                    <h4>📘 UUID Explained Simply</h4>
+                    <p><strong>UUID</strong> stands for "Universally Unique Identifier" - it's just a special code that's guaranteed to be unique.</p>
+                    
+                    <div class="example-box">
+                        <strong>Example UUID:</strong>
+                        <code style="display: block; padding: 10px; background: #f5f5f5; margin: 10px 0;">550e8400-e29b-41d4-a716-446655440000</code>
+                    </div>
+                    
+                    <h4>When to use a UUID vs other IDs:</h4>
+                    <ul>
+                        <li><strong>UUID:</strong> Best for new customers - click "Generate" to create one automatically</li>
+                        <li><strong>Simple number:</strong> Like <code>12345</code> - if your system uses simple numbers</li>
+                        <li><strong>Text code:</strong> Like <code>acme-corp</code> - if you use company name codes</li>
+                    </ul>
+                    
+                    <p><strong>💡 Tip:</strong> When creating a new subscription for a brand new customer, use the "Generate" button to create a UUID automatically!</p>
+                </div>
+                <button class="btn btn-primary" onclick="document.getElementById('uuidInfoModal').style.display='none'">Got it!</button>
             </div>
         </div>
 
@@ -184,31 +391,28 @@
         <!-- CORS Warning -->
         <div id="corsWarning" class="cors-warning" style="display: none;">
             <div class="cors-warning-content">
-                <h3>⚠️ CORS Error Detected</h3>
-                <p>The API server is blocking cross-origin requests from your browser. This is a security feature.</p>
-                <p><strong>Solutions:</strong></p>
-                <ul>
-                    <li><strong>Option 1:</strong> Use a CORS browser extension (for development/testing only)</li>
-                    <li><strong>Option 2:</strong> Run this app from the same domain as the API</li>
-                    <li><strong>Option 3:</strong> Contact API provider to enable CORS headers</li>
-                    <li><strong>Option 4:</strong> Use a proxy server to bypass CORS</li>
-                </ul>
-                <p><strong>Quick Test:</strong> Open the browser console (F12) when logged into tmarinestream and paste the test script from <code>test-api-console.js</code></p>
-                <p><strong>Endpoint Testing:</strong> If you get 404 errors, load <code>test-endpoints.js</code> in the console to test different endpoint patterns</p>
+                <h3>⚠️ Connection Blocked by Browser</h3>
+                <p>Your browser is blocking the connection to the API server. This is a security feature called CORS.</p>
+                
+                <div class="info-card">
+                    <h4>🔧 Simple Fix:</h4>
+                    <ol>
+                        <li>Make sure the proxy server is running: <code>node proxy-server.js</code></li>
+                        <li>Change "System Address" to: <code>http://localhost:3000</code></li>
+                        <li>Click "Save Address" and try again</li>
+                    </ol>
+                </div>
+                
                 <details style="margin-top: 15px;">
-                    <summary style="cursor: pointer; font-weight: bold;">📋 Quick Console Test Code</summary>
-                    <pre style="background: #f8f9fa; padding: 15px; border-radius: 6px; overflow-x: auto; margin-top: 10px;"><code>// Test in browser console (on tmarinestream domain)
-fetch('https://api.rise-x.io/api/v3/environment/marinestream/subscriptions', {
-  headers: {
-    'Authorization': 'Bearer YOUR_API_KEY_HERE',
-    'Content-Type': 'application/json'
-  }
-})
-.then(r => r.json())
-.then(console.log)
-.catch(console.error);</code></pre>
+                    <summary style="cursor: pointer; font-weight: bold;">📚 Other Solutions (Advanced)</summary>
+                    <ul style="margin-top: 10px;">
+                        <li><strong>Option 1:</strong> Use a CORS browser extension (for testing only)</li>
+                        <li><strong>Option 2:</strong> Run this app from the same domain as the API</li>
+                        <li><strong>Option 3:</strong> Contact your system administrator to enable CORS</li>
+                    </ul>
                 </details>
-                <button onclick="document.getElementById('corsWarning').style.display='none'" class="btn btn-secondary">Dismiss</button>
+                
+                <button onclick="document.getElementById('corsWarning').style.display='none'" class="btn btn-primary">Got it</button>
             </div>
         </div>
     </div>

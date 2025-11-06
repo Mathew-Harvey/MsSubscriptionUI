@@ -10,6 +10,8 @@ document.addEventListener('DOMContentLoaded', () => {
     initializeApp();
     loadSavedCredentials();
     setupEventListeners();
+    updateConnectionStatus();
+    updateSetupProgress();
 });
 
 // Initialize the application
@@ -23,6 +25,77 @@ function initializeApp() {
     }
     if (API_CONFIG.ecosystem) {
         document.getElementById('ecosystem').value = API_CONFIG.ecosystem;
+    }
+}
+
+// UUID Generator
+function generateUUID() {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+        const r = Math.random() * 16 | 0;
+        const v = c == 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+    });
+}
+
+// Update Connection Status Indicator
+function updateConnectionStatus() {
+    const statusElement = document.getElementById('connectionStatus');
+    const statusDot = statusElement.querySelector('.status-dot');
+    const statusText = statusElement.querySelector('.status-text');
+    
+    const hasKey = !!API_CONFIG.apiKey;
+    const hasUrl = !!API_CONFIG.baseUrl;
+    const hasEcosystem = !!API_CONFIG.ecosystem;
+    const isConnected = hasKey && hasUrl && hasEcosystem;
+    
+    if (isConnected) {
+        statusDot.classList.add('connected');
+        statusText.textContent = `Connected to ${API_CONFIG.ecosystem}`;
+    } else {
+        statusDot.classList.remove('connected');
+        statusText.textContent = 'Not Connected - Complete Setup';
+    }
+}
+
+// Update Setup Progress
+function updateSetupProgress() {
+    const progressItems = document.querySelectorAll('.progress-item');
+    
+    // Check each step
+    if (API_CONFIG.apiKey) {
+        progressItems[0].classList.add('complete');
+    } else {
+        progressItems[0].classList.remove('complete');
+    }
+    
+    if (API_CONFIG.baseUrl) {
+        progressItems[1].classList.add('complete');
+    } else {
+        progressItems[1].classList.remove('complete');
+    }
+    
+    if (API_CONFIG.ecosystem) {
+        progressItems[2].classList.add('complete');
+    } else {
+        progressItems[2].classList.remove('complete');
+    }
+}
+
+// Test API Connection
+async function testConnection() {
+    if (!API_CONFIG.apiKey || !API_CONFIG.baseUrl || !API_CONFIG.ecosystem) {
+        showNotification('⚠️ Please complete all setup steps first', 'error');
+        return;
+    }
+    
+    showNotification('🔄 Testing connection...', 'info');
+    
+    try {
+        await apiCall('/api/v3/environment/subscriptions');
+        showNotification('✅ Connection successful! You\'re all set up.', 'success');
+        updateConnectionStatus();
+    } catch (error) {
+        showNotification('❌ Connection failed. Please check your settings.', 'error');
     }
 }
 
@@ -55,6 +128,31 @@ function setupEventListeners() {
     document.getElementById('clearKey').addEventListener('click', clearApiKey);
     document.getElementById('saveUrl').addEventListener('click', saveBaseUrl);
     document.getElementById('saveEcosystem').addEventListener('click', saveEcosystem);
+    document.getElementById('testConnection').addEventListener('click', testConnection);
+
+    // Toggle password visibility
+    document.getElementById('toggleApiKey').addEventListener('click', togglePasswordVisibility);
+
+    // UUID Generation
+    document.getElementById('generateUUID').addEventListener('click', () => {
+        const companyIdInput = document.getElementById('companyId');
+        companyIdInput.value = generateUUID();
+        showNotification('✨ New UUID generated!', 'success');
+    });
+
+    // Show UUID Info Modal
+    document.getElementById('showUUIDInfo').addEventListener('click', () => {
+        document.getElementById('uuidInfoModal').style.display = 'block';
+    });
+
+    // Duration Quick Buttons
+    document.querySelectorAll('.btn-duration').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const days = btn.dataset.days;
+            document.getElementById('durationDays').value = days;
+        });
+    });
 
     // Subscription actions
     document.getElementById('refreshSubscriptions').addEventListener('click', loadSubscriptions);
@@ -71,7 +169,6 @@ function setupEventListeners() {
     document.getElementById('updateSubscription').addEventListener('click', openUpdateModal);
     document.getElementById('cancelSubscription').addEventListener('click', cancelSubscription);
     document.getElementById('activateSubscription').addEventListener('click', activateSubscription);
-    document.getElementById('pauseSubscription').addEventListener('click', pauseSubscription);
     document.getElementById('updateSubscriptionForm').addEventListener('submit', updateSubscription);
 
     // Close modals when clicking outside
@@ -80,6 +177,20 @@ function setupEventListeners() {
             closeModal();
         }
     });
+}
+
+// Toggle Password Visibility
+function togglePasswordVisibility() {
+    const apiKeyInput = document.getElementById('apiKey');
+    const toggleBtn = document.getElementById('toggleApiKey');
+    
+    if (apiKeyInput.type === 'password') {
+        apiKeyInput.type = 'text';
+        toggleBtn.textContent = '🙈';
+    } else {
+        apiKeyInput.type = 'password';
+        toggleBtn.textContent = '👁️';
+    }
 }
 
 // Tab switching
@@ -108,53 +219,63 @@ function switchTab(tabName) {
 function saveApiKey() {
     const apiKey = document.getElementById('apiKey').value.trim();
     if (!apiKey) {
-        showNotification('Please enter an API key', 'error');
+        showNotification('⚠️ Please enter an access key', 'error');
         return;
     }
     API_CONFIG.apiKey = apiKey;
     localStorage.setItem('apiKey', apiKey);
-    showNotification('API key saved successfully', 'success');
+    showNotification('✅ Access key saved successfully!', 'success');
+    updateConnectionStatus();
+    updateSetupProgress();
 }
 
 function clearApiKey() {
     API_CONFIG.apiKey = '';
     document.getElementById('apiKey').value = '';
     localStorage.removeItem('apiKey');
-    showNotification('API key cleared', 'info');
+    showNotification('🗑️ Access key cleared', 'info');
+    updateConnectionStatus();
+    updateSetupProgress();
 }
 
 function saveBaseUrl() {
     const baseUrl = document.getElementById('baseUrl').value.trim();
     if (!baseUrl) {
-        showNotification('Please enter a base URL', 'error');
+        showNotification('⚠️ Please enter a system address', 'error');
         return;
     }
     API_CONFIG.baseUrl = baseUrl;
     localStorage.setItem('apiBaseUrl', baseUrl);
-    showNotification('Base URL saved successfully', 'success');
+    showNotification('✅ System address saved successfully!', 'success');
+    updateConnectionStatus();
+    updateSetupProgress();
 }
 
 function saveEcosystem() {
     const ecosystem = document.getElementById('ecosystem').value.trim();
     if (!ecosystem) {
-        showNotification('Please enter an ecosystem name', 'error');
+        showNotification('⚠️ Please enter a workspace name', 'error');
         return;
     }
     API_CONFIG.ecosystem = ecosystem;
     localStorage.setItem('ecosystem', ecosystem);
-    showNotification('Ecosystem saved successfully', 'success');
+    showNotification('✅ Workspace saved successfully!', 'success');
+    updateConnectionStatus();
+    updateSetupProgress();
 }
 
 // API Helper Functions
-async function apiCall(endpoint, method = 'GET', body = null) {
+async function apiCall(endpoint, method = 'GET', body = null, config = {}) {
+    const { silent = false } = config; // Add silent option to suppress user-facing errors
+    
     if (!API_CONFIG.apiKey) {
-        showNotification('Please enter your API key first', 'error');
+        if (!silent) showNotification('🔑 Please enter and save your access key first', 'error');
         throw new Error('API key not set');
     }
 
     // Check if ecosystem is required (for endpoints that need it)
     if (!API_CONFIG.ecosystem && endpoint.includes('{ecosystem}')) {
-        showNotification('Please enter an ecosystem name first', 'error');
+        if (!silent) showNotification('🏢 Please enter and save your workspace name first', 'error');
         throw new Error('Ecosystem not set');
     }
 
@@ -230,23 +351,44 @@ async function apiCall(endpoint, method = 'GET', body = null) {
         // Handle CORS errors specifically
         if (error.message.includes('Failed to fetch') || error.message.includes('CORS') || 
             error.message.includes('Access-Control')) {
-            const corsError = 'CORS Error: Browser blocked the request due to missing CORS headers.';
-            showNotification(corsError, 'error');
-            // Show CORS warning modal
-            setTimeout(() => {
-                document.getElementById('corsWarning').style.display = 'flex';
-            }, 500);
+            const corsError = '⚠️ Connection Blocked: Your browser blocked the request. Try using the proxy server.';
+            if (!silent) {
+                showNotification(corsError, 'error');
+                // Show CORS warning modal
+                setTimeout(() => {
+                    document.getElementById('corsWarning').style.display = 'flex';
+                }, 500);
+            }
             throw new Error(corsError);
         }
         
         // Handle network errors
         if (error.name === 'TypeError' && error.message.includes('Failed to fetch')) {
-            const networkError = 'Network Error: Could not reach the API server. Check your connection and API URL.';
-            showNotification(networkError, 'error');
+            const networkError = '🌐 Network Error: Cannot reach the server. Check your System Address setting.';
+            if (!silent) showNotification(networkError, 'error');
             throw new Error(networkError);
         }
         
-        showNotification(error.message || 'An error occurred', 'error');
+        // Only show user notifications if not silent
+        if (!silent) {
+            // Handle 401 Unauthorized
+            if (error.message.includes('401')) {
+                showNotification('🔑 Invalid Access Key: Please check your API key is correct.', 'error');
+            } 
+            // Handle 404 Not Found
+            else if (error.message.includes('404')) {
+                showNotification('❌ Not Found: The subscription or endpoint does not exist.', 'error');
+            }
+            // Handle 403 Forbidden
+            else if (error.message.includes('403')) {
+                showNotification('🚫 Access Denied: You don\'t have permission for this action.', 'error');
+            }
+            // Generic error
+            else {
+                showNotification(error.message || '❌ An error occurred', 'error');
+            }
+        }
+        
         throw error;
     }
 }
@@ -260,7 +402,7 @@ async function loadSubscriptions() {
 
     // Check if ecosystem is set
     if (!API_CONFIG.ecosystem) {
-        container.innerHTML = '<p class="info" style="color: #dc3545;">Please enter and save an ecosystem name first</p>';
+        container.innerHTML = '<p class="info" style="color: #dc3545;">⚠️ Please complete the setup in the sidebar: enter and save your workspace name</p>';
         return;
     }
 
@@ -416,11 +558,13 @@ function viewSubscriptionDetails(subscription) {
     // Show/hide action buttons based on status
     const cancelBtn = document.getElementById('cancelSubscription');
     const activateBtn = document.getElementById('activateSubscription');
-    const pauseBtn = document.getElementById('pauseSubscription');
 
-    cancelBtn.style.display = (status === 'Archived' || status === 'Expired') ? 'none' : 'block';
-    activateBtn.style.display = status === 'Active' ? 'none' : 'block';
-    pauseBtn.style.display = 'none'; // Pause not in status enum
+    if (cancelBtn) {
+        cancelBtn.style.display = (status === 'Archived' || status === 'Expired') ? 'none' : 'block';
+    }
+    if (activateBtn) {
+        activateBtn.style.display = status === 'Active' ? 'none' : 'block';
+    }
 
     modal.style.display = 'block';
 }
@@ -437,7 +581,7 @@ async function createSubscription(e) {
     };
 
     if (!formData.planId || !formData.companyId || !formData.durationDays) {
-        showNotification('Please fill in all required fields', 'error');
+        showNotification('⚠️ Please fill in all required fields (marked with *)', 'error');
         return;
     }
 
@@ -446,9 +590,16 @@ async function createSubscription(e) {
         // Endpoint: POST /api/v3/environment/subscriptions (ecosystem in header)
         const result = await apiCall('/api/v3/environment/subscriptions', 'POST', formData);
 
-        showNotification('Subscription created successfully', 'success');
+        showNotification('✅ Subscription created successfully! The customer now has access.', 'success');
         document.getElementById('createSubscriptionForm').reset();
-        loadSubscriptions();
+        
+        // Reset duration to default
+        document.getElementById('durationDays').value = 365;
+        
+        // Switch to subscriptions tab to see the new subscription
+        setTimeout(() => {
+            switchTab('subscriptions');
+        }, 1500);
     } catch (error) {
         // Error already shown by apiCall
     }
@@ -516,7 +667,7 @@ async function updateSubscription(e) {
             // Endpoint: PUT /api/v3/environment/subscriptions/{subscriptionId}
             const result = await apiCall(`/api/v3/environment/subscriptions/${subscriptionId}`, 'PUT', formData);
 
-        showNotification('Subscription updated successfully', 'success');
+        showNotification('✅ Subscription updated successfully! Changes are now live.', 'success');
         closeModal();
         loadSubscriptions();
     } catch (error) {
@@ -528,7 +679,7 @@ async function updateSubscription(e) {
 async function cancelSubscription() {
     if (!currentSubscriptionId) return;
 
-    if (!confirm('Are you sure you want to archive this subscription?')) {
+    if (!confirm('⚠️ Are you sure you want to archive this subscription?\n\nThis will STOP the subscription and the customer will LOSE ACCESS immediately.\n\nYou can reactivate it later if needed.')) {
         return;
     }
 
@@ -537,7 +688,7 @@ async function cancelSubscription() {
             // Endpoint: PUT /api/v3/environment/subscriptions/{subscriptionId}
             const result = await apiCall(`/api/v3/environment/subscriptions/${currentSubscriptionId}`, 'PUT', { status: 'Archived' });
 
-        showNotification('Subscription archived successfully', 'success');
+        showNotification('✅ Subscription archived. The customer no longer has access.', 'success');
         closeModal();
         loadSubscriptions();
     } catch (error) {
@@ -549,21 +700,20 @@ async function cancelSubscription() {
 async function activateSubscription() {
     if (!currentSubscriptionId) return;
 
+    if (!confirm('Activate this subscription?\n\nThe customer will regain access immediately.')) {
+        return;
+    }
+
         try {
             // Endpoint: PUT /api/v3/environment/subscriptions/{subscriptionId}
             const result = await apiCall(`/api/v3/environment/subscriptions/${currentSubscriptionId}`, 'PUT', { status: 'Active' });
 
-        showNotification('Subscription activated successfully', 'success');
+        showNotification('✅ Subscription activated! The customer now has access.', 'success');
         closeModal();
         loadSubscriptions();
     } catch (error) {
         // Error already shown
     }
-}
-
-// Pause Subscription (not in API, but kept for UI consistency)
-async function pauseSubscription() {
-    showNotification('Pause functionality not available in this API', 'info');
 }
 
 // Search & Filter
@@ -623,38 +773,92 @@ function clearFilters() {
 // Load History
 async function loadHistory() {
     const container = document.getElementById('historyList');
-    container.innerHTML = '<p class="loading">Loading history...</p>';
+    container.innerHTML = '<p class="loading">Checking for history...</p>';
 
+    // Note: History/audit log endpoints may not be available in all API versions
+    // This attempts to load from common endpoints, but gracefully handles if unavailable
+    
     try {
         let history = [];
+        let historyEndpoint = null;
         
-        try {
-            history = await apiCall('/api/subscriptions/history');
-        } catch (e) {
+        // Try various possible history endpoints
+        const endpointsToTry = [
+            '/api/v3/environment/audit-log',
+            '/api/v3/audit-log',
+            '/api/subscriptions/history',
+            '/api/v3/environment/subscriptions/history'
+        ];
+        
+        for (const endpoint of endpointsToTry) {
             try {
-                history = await apiCall('/subscriptions/history');
-            } catch (e2) {
-                try {
-                    history = await apiCall('/api/audit-log');
-                } catch (e3) {
-                    history = await apiCall('/audit-log');
-                }
+                history = await apiCall(endpoint, 'GET', null, { silent: true });
+                historyEndpoint = endpoint;
+                console.log(`✅ History found at: ${endpoint}`);
+                break;
+            } catch (e) {
+                // Silently try next endpoint
+                continue;
             }
         }
 
+        if (!historyEndpoint) {
+            // No history endpoint found - show friendly message
+            container.innerHTML = `
+                <div class="info-card" style="margin: 0;">
+                    <h4>📜 History Not Available</h4>
+                    <p>The audit log/history feature is not available in your current API setup.</p>
+                    <p><strong>What you can do instead:</strong></p>
+                    <ul>
+                        <li>View all subscriptions in the "📋 All Subscriptions" tab</li>
+                        <li>Use the "🔍 Search" tab to find specific subscriptions by status or date</li>
+                        <li>Check subscription details by clicking on any subscription card</li>
+                    </ul>
+                    <p style="margin-top: 12px; font-size: 12px; color: var(--text-hint);">
+                        💡 History tracking may need to be enabled by your system administrator.
+                    </p>
+                </div>
+            `;
+            return;
+        }
+
+        // Parse response
         if (history.data) history = history.data;
         else if (history.history) history = history.history;
         else if (history.logs) history = history.logs;
         else if (!Array.isArray(history)) history = [history];
 
         if (history.length === 0) {
-            container.innerHTML = '<p class="info">No history found</p>';
+            container.innerHTML = `
+                <div class="info-card" style="margin: 0;">
+                    <h4>📜 No History Yet</h4>
+                    <p>No subscription activity has been recorded yet.</p>
+                    <p>History will appear here after you create, update, or modify subscriptions.</p>
+                </div>
+            `;
             return;
         }
 
         displayHistory(history, container);
+        showNotification('✅ History loaded successfully', 'success');
+        
     } catch (error) {
-        container.innerHTML = `<p class="info" style="color: #dc3545;">Error loading history: ${error.message}</p>`;
+        console.error('History error:', error);
+        container.innerHTML = `
+            <div class="info-card" style="margin: 0; border-left-color: #f59e0b;">
+                <h4>⚠️ Cannot Load History</h4>
+                <p>Unable to access the history feature at this time.</p>
+                <p><strong>This might mean:</strong></p>
+                <ul>
+                    <li>Your API doesn't support history tracking</li>
+                    <li>You don't have permission to view history</li>
+                    <li>The feature needs to be enabled by an administrator</li>
+                </ul>
+                <p style="margin-top: 12px;">
+                    <strong>Try:</strong> Using the Search tab to find subscriptions by date range instead.
+                </p>
+            </div>
+        `;
     }
 }
 

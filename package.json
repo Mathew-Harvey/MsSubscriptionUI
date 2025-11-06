@@ -1,7 +1,7 @@
 {
   "name": "subscription-ui-proxy",
   "version": "1.0.0",
-  "description": "CORS proxy server for Rise-X Subscription Management UI",
+  "description": "CORS proxy server for MarineStream Subscription Management UI",
   "main": "proxy-server.js",
   "scripts": {
     "start": "node proxy-server.js",
