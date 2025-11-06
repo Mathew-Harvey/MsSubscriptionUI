@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rise-X Subscription Management</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Rise-X Subscription Management</h1>
+            <div class="auth-section">
+                <div class="api-key-input">
+                    <label for="apiKey">API Key:</label>
+                    <input type="password" id="apiKey" placeholder="Enter your API key from dev tools">
+                    <button id="saveKey" class="btn btn-primary">Save Key</button>
+                    <button id="clearKey" class="btn btn-secondary">Clear</button>
+                </div>
+                <div class="api-base-url">
+                    <label for="baseUrl">API Base URL:</label>
+                    <input type="text" id="baseUrl" placeholder="https://api.example.com" value="https://api.idiana.io">
+                    <button id="saveUrl" class="btn btn-secondary">Save URL</button>
+                    <p style="font-size: 0.8em; margin-top: 5px; color: rgba(255,255,255,0.8);">
+                        💡 CORS issue? Use proxy: <code style="background: rgba(0,0,0,0.3); padding: 2px 6px; border-radius: 3px;">http://localhost:3000</code> (no trailing slash!)
+                    </p>
+                </div>
+                <div class="api-ecosystem">
+                    <label for="ecosystem">Ecosystem:</label>
+                    <input type="text" id="ecosystem" placeholder="my-ecosystem">
+                    <button id="saveEcosystem" class="btn btn-secondary">Save</button>
+                </div>
+            </div>
+        </header>
+
+        <nav class="tabs">
+            <button class="tab-btn active" data-tab="subscriptions">Subscriptions</button>
+            <button class="tab-btn" data-tab="create">Create Subscription</button>
+            <button class="tab-btn" data-tab="search">Search & Filter</button>
+            <button class="tab-btn" data-tab="history">History</button>
+        </nav>
+
+        <!-- Subscriptions Tab -->
+        <div id="subscriptions" class="tab-content active">
+            <div class="section-header">
+                <h2>All Subscriptions</h2>
+                <button id="refreshSubscriptions" class="btn btn-primary">Refresh</button>
+            </div>
+            <div id="subscriptionsList" class="subscriptions-list">
+                <p class="loading">Enter your API key and click "Refresh" to load subscriptions</p>
+            </div>
+        </div>
+
+        <!-- Create Subscription Tab -->
+        <div id="create" class="tab-content">
+            <div class="section-header">
+                <h2>Create New Subscription</h2>
+            </div>
+            <form id="createSubscriptionForm" class="form">
+                <div class="form-group">
+                    <label for="planId">Plan ID:</label>
+                    <input type="text" id="planId" required>
+                </div>
+                <div class="form-group">
+                    <label for="companyId">Company ID:</label>
+                    <input type="text" id="companyId" required>
+                </div>
+                <div class="form-group">
+                    <label for="durationDays">Duration (Days):</label>
+                    <input type="number" id="durationDays" min="1" value="365" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Create Subscription</button>
+            </form>
+        </div>
+
+        <!-- Search & Filter Tab -->
+        <div id="search" class="tab-content">
+            <div class="section-header">
+                <h2>Search & Filter Subscriptions</h2>
+            </div>
+            <div class="search-filters">
+                <div class="form-group">
+                    <label for="searchCompanyId">Company ID:</label>
+                    <input type="text" id="searchCompanyId" placeholder="Filter by company ID">
+                </div>
+                <div class="form-group">
+                    <label for="searchCompanyName">Company Name:</label>
+                    <input type="text" id="searchCompanyName" placeholder="Filter by company name">
+                </div>
+                <div class="form-group">
+                    <label for="searchPlanId">Plan ID:</label>
+                    <input type="text" id="searchPlanId" placeholder="Filter by plan ID">
+                </div>
+                <div class="form-group">
+                    <label for="searchStatus">Status:</label>
+                    <select id="searchStatus">
+                        <option value="">All Statuses</option>
+                        <option value="Active">Active</option>
+                        <option value="Archived">Archived</option>
+                        <option value="Expired">Expired</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="searchDateFrom">Date From:</label>
+                    <input type="date" id="searchDateFrom">
+                </div>
+                <div class="form-group">
+                    <label for="searchDateTo">Date To:</label>
+                    <input type="date" id="searchDateTo">
+                </div>
+                <button id="applyFilters" class="btn btn-primary">Apply Filters</button>
+                <button id="clearFilters" class="btn btn-secondary">Clear Filters</button>
+            </div>
+            <div id="filteredResults" class="subscriptions-list">
+                <p class="info">Use filters above to search subscriptions</p>
+            </div>
+        </div>
+
+        <!-- History Tab -->
+        <div id="history" class="tab-content">
+            <div class="section-header">
+                <h2>Subscription History</h2>
+                <button id="refreshHistory" class="btn btn-primary">Refresh</button>
+            </div>
+            <div id="historyList" class="history-list">
+                <p class="info">History will appear here</p>
+            </div>
+        </div>
+
+        <!-- Subscription Detail Modal -->
+        <div id="subscriptionModal" class="modal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <h2 id="modalTitle">Subscription Details</h2>
+                <div id="modalBody"></div>
+                <div class="modal-actions">
+                    <button id="updateSubscription" class="btn btn-primary">Update</button>
+                    <button id="cancelSubscription" class="btn btn-danger">Cancel Subscription</button>
+                    <button id="activateSubscription" class="btn btn-success">Activate</button>
+                    <button id="pauseSubscription" class="btn btn-warning">Pause</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Update Subscription Modal -->
+        <div id="updateModal" class="modal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <h2>Update Subscription</h2>
+                <form id="updateSubscriptionForm" class="form">
+                    <input type="hidden" id="updateSubscriptionId">
+                    <div class="form-group">
+                        <label for="updatePlanId">Plan ID:</label>
+                        <input type="text" id="updatePlanId">
+                    </div>
+                    <div class="form-group">
+                        <label for="updateStartDate">Start Date:</label>
+                        <input type="date" id="updateStartDate">
+                    </div>
+                    <div class="form-group">
+                        <label for="updateEndDate">End Date:</label>
+                        <input type="date" id="updateEndDate">
+                    </div>
+                    <div class="form-group">
+                        <label for="updateStatus">Status:</label>
+                        <select id="updateStatus">
+                            <option value="Active">Active</option>
+                            <option value="Archived">Archived</option>
+                            <option value="Expired">Expired</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="updateMetadata">Metadata (JSON):</label>
+                        <textarea id="updateMetadata" rows="4"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Update Subscription</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Notification Area -->
+        <div id="notification" class="notification"></div>
+        
+        <!-- CORS Warning -->
+        <div id="corsWarning" class="cors-warning" style="display: none;">
+            <div class="cors-warning-content">
+                <h3>⚠️ CORS Error Detected</h3>
+                <p>The API server is blocking cross-origin requests from your browser. This is a security feature.</p>
+                <p><strong>Solutions:</strong></p>
+                <ul>
+                    <li><strong>Option 1:</strong> Use a CORS browser extension (for development/testing only)</li>
+                    <li><strong>Option 2:</strong> Run this app from the same domain as the API</li>
+                    <li><strong>Option 3:</strong> Contact API provider to enable CORS headers</li>
+                    <li><strong>Option 4:</strong> Use a proxy server to bypass CORS</li>
+                </ul>
+                <p><strong>Quick Test:</strong> Open the browser console (F12) when logged into tmarinestream and paste the test script from <code>test-api-console.js</code></p>
+                <p><strong>Endpoint Testing:</strong> If you get 404 errors, load <code>test-endpoints.js</code> in the console to test different endpoint patterns</p>
+                <details style="margin-top: 15px;">
+                    <summary style="cursor: pointer; font-weight: bold;">📋 Quick Console Test Code</summary>
+                    <pre style="background: #f8f9fa; padding: 15px; border-radius: 6px; overflow-x: auto; margin-top: 10px;"><code>// Test in browser console (on tmarinestream domain)
+fetch('https://api.rise-x.io/api/v3/environment/marinestream/subscriptions', {
+  headers: {
+    'Authorization': 'Bearer YOUR_API_KEY_HERE',
+    'Content-Type': 'application/json'
+  }
+})
+.then(r => r.json())
+.then(console.log)
+.catch(console.error);</code></pre>
+                </details>
+                <button onclick="document.getElementById('corsWarning').style.display='none'" class="btn btn-secondary">Dismiss</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
