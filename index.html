@@ -120,6 +120,17 @@
                             <span class="result-value mono" id="selectedCompanyId"></span>
                         </div>
                     </div>
+                    
+                    <!-- Current Access -->
+                    <div class="current-access" id="currentAccess">
+                        <div class="access-header">
+                            <span class="access-title">Current Access</span>
+                            <span class="access-loading" id="accessLoading">Loading...</span>
+                        </div>
+                        <div id="accessContent">
+                            <!-- Access details will be loaded here -->
+                        </div>
+                    </div>
                 </div>
             </div>
         </section>
@@ -176,27 +187,12 @@
                             <span>Access Permissions</span>
                             <button type="button" class="btn-add" id="addResource">+ Add</button>
                         </div>
+                        <p class="section-hint">
+                            Current resources are pre-loaded below. Add more, modify, or remove as needed.
+                        </p>
                         
                         <div id="resourcesList" class="resources-list">
                             <!-- Resources will be added here dynamically -->
-                        </div>
-                    </div>
-
-                    <!-- Resource Search Modal -->
-                    <div class="search-modal" id="searchModal">
-                        <div class="search-modal-content">
-                            <div class="search-header">
-                                <input 
-                                    type="text" 
-                                    id="searchInput" 
-                                    placeholder="Search flows and assets by name..."
-                                    class="search-input"
-                                >
-                                <button class="btn-close-search" id="closeSearch">✕</button>
-                            </div>
-                            <div class="search-results" id="searchResults">
-                                <div class="search-empty">Type to search...</div>
-                            </div>
                         </div>
                     </div>
 

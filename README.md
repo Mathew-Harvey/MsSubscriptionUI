@@ -78,18 +78,21 @@ If Acme is brand new:
 
 ```
 1. Company ID & Name are already filled in (from John's card!)
-2. Adjust the name if needed: "Acme Corp - Premium"
-3. Pick duration: Click "1 Year"
-4. Add what they can access:
-   • Click "+ Add"
-   • Click 🔍 button
-   • Type: "Customer Onboarding"
-   • Click the workflow from search results
-   • Permissions are set to "View, Start" (adjust if needed)
-   • Repeat for more flows/assets
+2. Their CURRENT resources are PRE-LOADED into the form automatically!
+   • See all flows, layouts, and assets they currently have
+   • Modify permissions if needed
+   • Remove any (click ✕)
+   • Add more (click "+ Add")
+3. Adjust the name: "Acme Corp - Premium"
+4. Pick duration: Click "1 Year"
 5. Click "Create Subscription"
-6. ✓ Done! Acme can now access those workflows.
+6. ✓ Done! Their access is updated.
 ```
+
+**Perfect for:**
+- Renewing existing access (all resources pre-filled!)
+- Adding more resources (pre-filled + add new ones)
+- Modifying permissions (pre-filled, just edit)
 
 **Total time: ~2 minutes** 🚀
 
@@ -97,11 +100,18 @@ If Acme is brand new:
 
 ## Key Features
 
-### 🔍 Search Flows & Assets by Name
-- No need to remember UUIDs or IDs
-- Just type the name: "Customer" → see all matches
-- Click to select → ID filled automatically
-- Works for both flows and assets
+### 👁️ Current Access Auto-Loads Into Form
+- When you select a user, their current resources **automatically fill** Step 2
+- All flows, layouts, and assets are pre-loaded
+- See exactly what they have - modify, remove, or add more
+- Perfect for renewals - everything is already there!
+- Avoid duplicates - you can see what's already included
+
+### 📋 Simple Resource Management
+- Copy resource IDs from MarineStream admin panel
+- Paste them directly into the form
+- Select Flow or Asset type
+- Set permissions (View, Start, Edit, etc.)
 
 ### 📧 Work with Emails, Not IDs
 - Enter emails you know
@@ -216,14 +226,12 @@ The company is created automatically when you create the first user.
 - Follow the steps above to get your API key
 - Paste it in and save
 
-### Search returns no results
+### Where do I find resource IDs?
 
-**Problem:** The flow/asset name might not match exactly.
-
-**Solution:**
-- Try partial names (e.g., "customer" instead of "Customer Onboarding Workflow")
-- Try different keywords
-- Check the MarineStream admin panel for the exact name
+**Answer:** In the MarineStream admin panel
+- Each flow/asset has a unique ID
+- Usually looks like: `df596c86-ee83-6aa4-bf62-1e46f847cf9a`
+- Copy the entire ID and paste it into this app
 
 ---
 

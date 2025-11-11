@@ -37,6 +37,7 @@
 4. See Sarah's user card appear
 5. Click on her card to select
 6. ✓ Company details auto-fill into Step 2!
+7. See their **current subscriptions** and what access they already have
 
 **If they ALREADY exist:**
 1. Enter their email (or just name, or company domain)
@@ -44,6 +45,7 @@
 3. See all matching users as cards
 4. Click the one you want
 5. ✓ Company details auto-fill into Step 2!
+6. See their **current subscriptions** - know what they already have access to
 
 ---
 
@@ -54,9 +56,10 @@
 3. **Pick duration:** Click 1 Month, 3 Months, 1 Year, or 2 Years
 4. **Add resources:**
    - Click **"+ Add"** to add a row
-   - Click the **🔍 search button**
-   - Type the flow or asset **name** (not ID!)
-   - Click the one you want from the search results
+   - Go to **MarineStream admin panel**
+   - Find the flow or asset you want to grant access to
+   - **Copy its resource ID** (the UUID)
+   - **Paste** it into the resource field
    - Adjust **Permissions** if needed: `View, Start, Edit`
    - Repeat for each flow/asset you want to grant access to
 5. **Click "Create Subscription"**
@@ -89,11 +92,13 @@ Duration: 1 Year (click the pill)
 
 Resources:
   Row 1:
-    Click 🔍 → Search "Main Workflow" → Select it
+    Type: Flow
+    ID: df596c86-ee83-6aa4-bf62-1e46f847cf9a (paste from MarineStream)
     Permissions: View, Start
 
   Row 2:
-    Click 🔍 → Search "Reports" → Select it
+    Type: Flow
+    ID: 3eaf98b4-8995-644e-bf6a-2bc3aec1fd7b (paste from MarineStream)
     Permissions: View, Start, Edit
 
 → Click "Create Subscription"
@@ -106,16 +111,19 @@ Resources:
 
 ## Tips
 
-### Quick Copy
-- Click the **"Copy ID"** button in Step 1 to copy the company ID
-- Then paste it in Step 2 (or click "Use ID from Step 1")
+### See Current Access
+- When you select a user, their current subscriptions appear automatically
+- See what flows/assets they already have access to
+- Check expiry dates
+- Helps you avoid creating duplicate access
 
-### Searching for Flows/Assets
-- Click the **🔍 button** in any resource row
-- Type the **name** of the flow or asset (e.g., "Main Workflow")
-- Results appear as you type
-- Click the one you want
-- The name and ID are filled in automatically!
+### Getting Resource IDs
+- Open **MarineStream admin panel** in another tab
+- Navigate to flows or assets
+- Find the one you want to grant access to
+- **Copy the resource ID** (looks like a UUID)
+- **Paste** it into the app
+- The app displays shortened IDs (first 8 chars) for easier reading
 
 ### Common Permissions
 - **Flows:** `View, Start, Edit, Delete`

@@ -528,6 +528,162 @@ body {
     margin-bottom: 20px;
 }
 
+/* Current Access Section */
+.current-access {
+    margin-top: 24px;
+    padding-top: 24px;
+    border-top: 2px solid rgba(16, 185, 129, 0.2);
+}
+
+.access-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.access-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.access-loading {
+    font-size: 12px;
+    color: var(--text-hint);
+    font-weight: 500;
+}
+
+.access-empty {
+    padding: 20px;
+    text-align: center;
+    background: rgba(148, 163, 184, 0.1);
+    border-radius: var(--radius-sm);
+    color: var(--text-secondary);
+    font-size: 14px;
+}
+
+.access-notice {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 16px;
+    background: rgba(249, 115, 22, 0.1);
+    border: 1px solid rgba(249, 115, 22, 0.3);
+    border-radius: var(--radius-sm);
+    margin-bottom: 16px;
+    font-size: 13px;
+    color: var(--text-secondary);
+}
+
+.subscription-item {
+    padding: 16px;
+    background: white;
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    border-radius: var(--radius-sm);
+    margin-bottom: 12px;
+}
+
+.subscription-item:last-child {
+    margin-bottom: 0;
+}
+
+.subscription-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.subscription-status {
+    font-size: 11px;
+    padding: 3px 8px;
+    background: var(--success);
+    color: white;
+    border-radius: 4px;
+    font-weight: 600;
+}
+
+.subscription-status.expired {
+    background: #94a3b8;
+}
+
+.subscription-status.archived {
+    background: #64748b;
+}
+
+.subscription-details {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-bottom: 12px;
+}
+
+.subscription-resources {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.resource-group-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 0 4px 0;
+    margin-top: 8px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.resource-group-header:first-child {
+    margin-top: 0;
+}
+
+.resource-group-icon {
+    font-size: 16px;
+}
+
+.resource-group-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-primary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.subscription-resource {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    font-size: 13px;
+    color: var(--text-primary);
+    padding: 6px 8px;
+    border-radius: 4px;
+    transition: background 0.2s ease;
+}
+
+.subscription-resource:hover {
+    background: rgba(0, 0, 0, 0.03);
+}
+
+.subscription-resource-name {
+    flex: 1;
+    font-weight: 500;
+    font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
+    font-size: 12px;
+}
+
+.subscription-resource-perms {
+    font-size: 11px;
+    color: var(--text-hint);
+    font-weight: 500;
+    white-space: nowrap;
+}
+
 .result-icon {
     font-size: 28px;
 }
@@ -649,6 +805,13 @@ body {
     color: var(--text-primary);
 }
 
+.section-hint {
+    font-size: 13px;
+    color: var(--text-hint);
+    margin-bottom: 12px;
+    margin-top: -8px;
+}
+
 .btn-add {
     padding: 6px 12px;
     background: var(--background);
@@ -708,34 +871,9 @@ body {
     box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.1);
 }
 
-.resource-input-wrapper {
-    position: relative;
-    display: flex;
-    gap: 8px;
-    align-items: center;
-}
-
-.resource-input-wrapper input {
-    flex: 1;
-    cursor: pointer;
-}
-
-.btn-search-resource {
-    width: 40px;
-    height: 40px;
-    background: var(--primary);
-    color: white;
-    border: none;
-    border-radius: 6px;
-    font-size: 16px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    flex-shrink: 0;
-}
-
-.btn-search-resource:hover {
-    background: var(--primary-hover);
-    transform: scale(1.05);
+.resource-id-input {
+    font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
+    font-size: 13px !important;
 }
 
 .btn-remove {

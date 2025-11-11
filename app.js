@@ -15,7 +15,8 @@ const CONFIG = {
 const state = {
     selectedUser: null,
     companyId: null,
-    companyName: null
+    companyName: null,
+    currentResources: [] // Store current resources from subscriptions
 };
 
 // ============================================
@@ -55,21 +56,7 @@ function setupEventListeners() {
     document.getElementById('subscriptionForm').addEventListener('submit', createSubscription);
     document.getElementById('createAnother').addEventListener('click', resetForm);
 
-    // Resource Search
-    document.getElementById('closeSearch').addEventListener('click', closeSearchModal);
-    document.getElementById('searchInput').addEventListener('input', (e) => {
-        clearTimeout(searchTimeout);
-        searchTimeout = setTimeout(() => {
-            searchResources(e.target.value.trim());
-        }, 300);
-    });
-
-    // Close search modal on backdrop click
-    document.getElementById('searchModal').addEventListener('click', (e) => {
-        if (e.target.id === 'searchModal') {
-            closeSearchModal();
-        }
-    });
+    // Resource search removed - API doesn't support it
 
     // Duration pills
     document.querySelectorAll('.pill').forEach(pill => {
@@ -335,6 +322,9 @@ function selectUser(user, cardElement) {
     document.getElementById('selectedCompanyId').textContent = state.companyId;
     document.getElementById('selectedUserBox').style.display = 'block';
     
+    // Load current subscriptions
+    loadCurrentAccess(state.companyId);
+    
     // Auto-fill subscription form
     document.getElementById('subscriptionCompanyId').value = state.companyId;
     
@@ -354,6 +344,256 @@ function selectUser(user, cardElement) {
             block: 'start' 
         });
     }, 300);
+}
+
+async function loadCurrentAccess(companyId) {
+    const loadingEl = document.getElementById('accessLoading');
+    const contentEl = document.getElementById('accessContent');
+    
+    loadingEl.style.display = 'inline';
+    contentEl.innerHTML = '';
+    
+    try {
+        // Get all subscriptions for this company
+        const endpoint = `/api/v3/subscription?companyId=${encodeURIComponent(companyId)}`;
+        const result = await apiCall(endpoint, 'GET');
+        
+        let subscriptions = result.data || result.subscriptions || result;
+        if (!Array.isArray(subscriptions)) {
+            subscriptions = subscriptions ? [subscriptions] : [];
+        }
+        
+        console.log('📊 Subscriptions data received:', subscriptions);
+        
+        if (subscriptions.length === 0) {
+            loadingEl.style.display = 'none';
+            contentEl.innerHTML = '<div class="access-empty">No active subscriptions yet. This will be their first!</div>';
+            return;
+        }
+        
+        loadingEl.style.display = 'none';
+        
+        // Extract all resources from all active subscriptions
+        extractCurrentResources(subscriptions);
+        
+        // Display subscriptions with grouped resources
+        displayCurrentSubscriptions(subscriptions);
+        
+        // Pre-populate Step 2 with current resources
+        populateResourcesInForm();
+        
+    } catch (error) {
+        console.error('Error loading subscriptions:', error);
+        loadingEl.style.display = 'none';
+        contentEl.innerHTML = '<div class="access-empty">Could not load current access</div>';
+    }
+}
+
+function extractCurrentResources(subscriptions) {
+    // Extract all resources from active subscriptions
+    state.currentResources = [];
+    
+    subscriptions.forEach(sub => {
+        // Only include active subscriptions
+        if (sub.status === 1 || sub.status === 'Active' || sub.status === 'active') {
+            const resources = sub.resources || [];
+            resources.forEach(r => {
+                state.currentResources.push({
+                    type: r.type || r.resourceType || 'Flow',
+                    originId: r.originId || r.resourceId || r.id,
+                    features: r.features || r.permissions || []
+                });
+            });
+        }
+    });
+    
+    console.log(`📦 Extracted ${state.currentResources.length} resources from active subscriptions`);
+}
+
+function populateResourcesInForm() {
+    const list = document.getElementById('resourcesList');
+    
+    // Clear existing rows
+    list.innerHTML = '';
+    
+    if (state.currentResources.length === 0) {
+        // No current resources, add one empty row
+        addResourceRow();
+        return;
+    }
+    
+    // Add a row for each current resource
+    state.currentResources.forEach(resource => {
+        const row = document.createElement('div');
+        row.className = 'resource-row';
+        
+        const shortId = resource.originId ? resource.originId.split('-')[0] : '';
+        const permissions = Array.isArray(resource.features) ? resource.features.join(', ') : 'View, Start';
+        
+        row.innerHTML = `
+            <select class="resource-type">
+                <option value="Flow" ${resource.type === 'Flow' ? 'selected' : ''}>Flow</option>
+                <option value="Layout" ${resource.type === 'Layout' ? 'selected' : ''}>Layout</option>
+                <option value="Asset" ${resource.type === 'Asset' ? 'selected' : ''}>Asset</option>
+            </select>
+            <input 
+                type="text" 
+                class="resource-id-input" 
+                value="${resource.originId}"
+                placeholder="Paste resource ID from MarineStream"
+                required
+            />
+            <input 
+                type="text" 
+                class="resource-permissions" 
+                value="${permissions}"
+                placeholder="View, Start, Edit"
+                required
+            />
+            <button type="button" class="btn-remove" onclick="this.parentElement.remove()">
+                ✕
+            </button>
+        `;
+        
+        list.appendChild(row);
+    });
+    
+    // Add one extra empty row for adding new resources
+    addResourceRow();
+    
+    showToast(`Pre-loaded ${state.currentResources.length} existing resources - add more or modify`, 'info');
+}
+
+function displayCurrentSubscriptions(subscriptions) {
+    const contentEl = document.getElementById('accessContent');
+    
+    // Always show notice about technical IDs
+    const noticeHtml = `
+        <div class="access-notice">
+            <span>ℹ️</span>
+            <span>Showing technical IDs (first 8 characters) - hover over any resource to see full ID</span>
+        </div>
+    `;
+    
+    const html = subscriptions.map(sub => {
+        // Handle status - could be number (1, 0) or string ("Active", "Archived")
+        let status = 'Active';
+        let statusClass = 'active';
+        
+        if (sub.status === 1 || sub.status === 'Active' || sub.status === 'active') {
+            status = 'Active';
+            statusClass = 'active';
+        } else if (sub.status === 0 || sub.status === 'Archived' || sub.status === 'archived') {
+            status = 'Archived';
+            statusClass = 'archived';
+        } else if (sub.status === 'Expired' || sub.status === 'expired') {
+            status = 'Expired';
+            statusClass = 'expired';
+        } else if (sub.status) {
+            status = String(sub.status);
+            statusClass = String(sub.status).toLowerCase();
+        }
+        
+        const displayName = sub.displayName || 'Subscription';
+        const validTo = sub.validTo || sub.endDate;
+        const expiryDate = validTo ? new Date(validTo).toLocaleDateString() : 'No expiry';
+        
+        // Get resources and group by type
+        const resources = sub.resources || [];
+        let resourcesHtml = '';
+        
+        if (resources.length > 0) {
+            // Log first resource to see structure
+            if (resources[0]) {
+                console.log('📋 Sample resource structure:', resources[0]);
+            }
+            
+            // Group resources by type
+            const grouped = {
+                Flow: [],
+                Layout: [],
+                Asset: [],
+                Other: []
+            };
+            
+            resources.forEach(r => {
+                const type = r.type || r.resourceType || 'Other';
+                const group = grouped[type] || grouped.Other;
+                group.push(r);
+            });
+            
+            // Display each group
+            const groupOrder = ['Flow', 'Layout', 'Asset', 'Other'];
+            
+            resourcesHtml = groupOrder.map(groupType => {
+                const items = grouped[groupType];
+                if (!items || items.length === 0) return '';
+                
+                const icon = groupType === 'Flow' ? '🔄' : groupType === 'Layout' ? '📐' : groupType === 'Asset' ? '📦' : '📄';
+                const plural = items.length === 1 ? '' : 's';
+                
+                const groupHeader = `
+                    <div class="resource-group-header">
+                        <span class="resource-group-icon">${icon}</span>
+                        <span class="resource-group-title">${groupType}${plural} (${items.length})</span>
+                    </div>
+                `;
+                
+                const groupItems = items.map(r => {
+                    const resourceId = r.originId || r.resourceId || r.id;
+                    
+                    // Try to get friendly name, otherwise show shortened UUID
+                    let displayName = r.name || r.displayName;
+                    
+                    if (!displayName && resourceId) {
+                        const shortId = resourceId.split('-')[0];
+                        displayName = shortId;
+                    } else if (!displayName) {
+                        displayName = 'Unknown';
+                    }
+                    
+                    // Handle features/permissions
+                    let perms = '';
+                    if (r.features && Array.isArray(r.features)) {
+                        perms = r.features.slice(0, 4).join(', ');
+                        if (r.features.length > 4) perms += '...';
+                    } else if (r.permissions && Array.isArray(r.permissions)) {
+                        perms = r.permissions.slice(0, 4).join(', ');
+                        if (r.permissions.length > 4) perms += '...';
+                    }
+                    
+                    return `
+                        <div class="subscription-resource" title="Full ID: ${resourceId || 'Unknown'}\nType: ${groupType}">
+                            <span class="subscription-resource-name">${displayName}</span>
+                            <span class="subscription-resource-perms">${perms}</span>
+                        </div>
+                    `;
+                }).join('');
+                
+                return groupHeader + groupItems;
+            }).filter(html => html).join('');
+            
+        } else {
+            resourcesHtml = '<div class="subscription-resource"><span class="subscription-resource-name">Full access (no restrictions)</span></div>';
+        }
+        
+        return `
+            <div class="subscription-item">
+                <div class="subscription-name">
+                    <span>${displayName}</span>
+                    <span class="subscription-status ${statusClass}">${status}</span>
+                </div>
+                <div class="subscription-details">
+                    Expires: ${expiryDate}
+                </div>
+                <div class="subscription-resources">
+                    ${resourcesHtml}
+                </div>
+            </div>
+        `;
+    }).join('');
+    
+    contentEl.innerHTML = noticeHtml + html;
 }
 
 function extractCompanyName(email) {
@@ -379,8 +619,6 @@ function autofillCompanyId() {
     }
 }
 
-let currentSearchRow = null;
-
 function addResourceRow() {
     const list = document.getElementById('resourcesList');
     
@@ -395,19 +633,15 @@ function addResourceRow() {
     row.innerHTML = `
         <select class="resource-type">
             <option value="Flow">Flow</option>
+            <option value="Layout">Layout</option>
             <option value="Asset">Asset</option>
         </select>
-        <div class="resource-input-wrapper">
-            <input 
-                type="text" 
-                class="resource-name" 
-                placeholder="Flow or Asset name"
-                readonly
-                required
-            />
-            <input type="hidden" class="resource-id" />
-            <button type="button" class="btn-search-resource">🔍</button>
-        </div>
+        <input 
+            type="text" 
+            class="resource-id-input" 
+            placeholder="Paste resource ID from MarineStream"
+            required
+        />
         <input 
             type="text" 
             class="resource-permissions" 
@@ -420,121 +654,10 @@ function addResourceRow() {
         </button>
     `;
     
-    // Add search button listener
-    const searchBtn = row.querySelector('.btn-search-resource');
-    searchBtn.addEventListener('click', () => {
-        currentSearchRow = row;
-        openSearchModal();
-    });
-    
     list.appendChild(row);
 }
 
-// ============================================
-// RESOURCE SEARCH
-// ============================================
-
-function openSearchModal() {
-    document.getElementById('searchModal').classList.add('open');
-    document.getElementById('searchInput').focus();
-}
-
-function closeSearchModal() {
-    document.getElementById('searchModal').classList.remove('open');
-    document.getElementById('searchInput').value = '';
-    document.getElementById('searchResults').innerHTML = '<div class="search-empty">Type to search...</div>';
-}
-
-let searchTimeout = null;
-
-async function searchResources(query) {
-    if (!query || query.length < 2) {
-        document.getElementById('searchResults').innerHTML = '<div class="search-empty">Type at least 2 characters...</div>';
-        return;
-    }
-
-    document.getElementById('searchResults').innerHTML = '<div class="search-loading">Searching...</div>';
-
-    try {
-        // Search both flows and assets in parallel
-        const [flowsResult, assetsResult] = await Promise.allSettled([
-            apiCall(`/api/v3/flows?name=${encodeURIComponent(query)}`).catch(() => ({ data: [] })),
-            apiCall(`/api/v3/assets?name=${encodeURIComponent(query)}`).catch(() => ({ data: [] }))
-        ]);
-
-        let flows = [];
-        let assets = [];
-
-        if (flowsResult.status === 'fulfilled') {
-            flows = flowsResult.value?.data || flowsResult.value?.flows || [];
-            if (!Array.isArray(flows)) flows = flows ? [flows] : [];
-        }
-
-        if (assetsResult.status === 'fulfilled') {
-            assets = assetsResult.value?.data || assetsResult.value?.assets || [];
-            if (!Array.isArray(assets)) assets = assets ? [assets] : [];
-        }
-
-        const results = [
-            ...flows.map(f => ({ ...f, type: 'Flow' })),
-            ...assets.map(a => ({ ...a, type: 'Asset' }))
-        ];
-
-        displaySearchResults(results);
-
-    } catch (error) {
-        console.error('Search error:', error);
-        document.getElementById('searchResults').innerHTML = '<div class="search-empty">Search failed. Please try again.</div>';
-    }
-}
-
-function displaySearchResults(results) {
-    const container = document.getElementById('searchResults');
-
-    if (results.length === 0) {
-        container.innerHTML = '<div class="search-empty">No results found</div>';
-        return;
-    }
-
-    container.innerHTML = results.map(item => {
-        const resourceId = item.resourceId || item.id || item.originId;
-        const name = item.name || item.displayName || 'Unnamed';
-        
-        return `
-            <div class="search-item" data-id="${resourceId}" data-name="${name}" data-type="${item.type}">
-                <div class="search-item-header">
-                    <span class="search-item-name">${name}</span>
-                    <span class="search-item-type">${item.type}</span>
-                </div>
-                <div class="search-item-id">ID: ${resourceId}</div>
-            </div>
-        `;
-    }).join('');
-
-    // Add click handlers
-    container.querySelectorAll('.search-item').forEach(item => {
-        item.addEventListener('click', () => {
-            selectResource(
-                item.dataset.id,
-                item.dataset.name,
-                item.dataset.type
-            );
-        });
-    });
-}
-
-function selectResource(resourceId, name, type) {
-    if (!currentSearchRow) return;
-
-    // Fill the row with selected resource
-    currentSearchRow.querySelector('.resource-type').value = type;
-    currentSearchRow.querySelector('.resource-name').value = name;
-    currentSearchRow.querySelector('.resource-id').value = resourceId;
-
-    // Close modal
-    closeSearchModal();
-    showToast(`Added: ${name}`, 'success');
-}
+// Resource search removed - API endpoints don't exist
 
 async function createSubscription(e) {
     e.preventDefault();
@@ -557,12 +680,11 @@ async function createSubscription(e) {
         if (hasError) return;
         
         const type = row.querySelector('.resource-type').value;
-        const originId = row.querySelector('.resource-id').value.trim(); // Hidden input
+        const originId = row.querySelector('.resource-id-input').value.trim();
         const permissionsText = row.querySelector('.resource-permissions').value.trim();
-        const name = row.querySelector('.resource-name').value.trim();
 
-        if (!name || !originId) {
-            showToast('Please search and select all flows/assets (click 🔍)', 'error');
+        if (!originId) {
+            showToast('Please enter resource IDs for all flows/assets', 'error');
             hasError = true;
             return;
         }
@@ -643,6 +765,7 @@ function resetForm() {
     state.selectedUser = null;
     state.companyId = null;
     state.companyName = null;
+    state.currentResources = [];
     
     // Reset search
     document.getElementById('userSearch').value = '';
@@ -659,7 +782,7 @@ function resetForm() {
     document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
     document.querySelector('.pill[data-days="365"]').classList.add('active');
     
-    // Reset resources list
+    // Reset resources list to empty
     const list = document.getElementById('resourcesList');
     list.innerHTML = '';
     addResourceRow();
