@@ -1,303 +1,440 @@
 # MarineStream Subscription Manager
 
-> Give your customers access to specific workflows and assets in minutes, not hours.
+> Give your customers access to MarineStream workflows and assets in 2 minutes.
 
-A beautifully simple app for managing who can access what in MarineStream. No technical knowledge required.
-
----
-
-## What Does This Do?
-
-Let's say **Acme Corporation** just signed up. You want to give them access to:
-- The "Customer Onboarding" workflow
-- The "Reports Dashboard" workflow  
-- The "Customer Database" asset
-
-**This app lets you do that in 2 minutes.** ⏱️
+A beautifully simple, Apple-inspired app for managing who can access what in MarineStream. No technical knowledge required.
 
 ---
 
-## Quick Start (60 Seconds)
-
-### First Time Setup
+## 🚀 Quick Start (First Time - 60 Seconds)
 
 1. **Open** `index.html` in any browser (Chrome recommended)
 2. **Click "Settings"** (top right corner)
-3. **Paste your API key** (see below for how to get it)
+3. **Paste your API key** (see below)
 4. **Click "Save & Connect"**
 5. **You're ready!** ✓
 
 ### Getting Your API Key
 
-Your API key lets this app talk to MarineStream on your behalf.
+1. Open `app.marinestream.io` in Chrome and log in
+2. Press **F12** to open Developer Tools
+3. Click **"Network"** tab
+4. Refresh the page (**F5**)
+5. Click any request in the list
+6. Click **"Headers"** on the right
+7. Scroll to find `Authorization: Bearer ey...`
+8. Copy **only** the part after "Bearer " (starts with "ey")
+9. Paste into Settings
 
-**Here's how to get it:**
-
-1. Open `app.marinestream.io` in Chrome
-2. Log in with your credentials
-3. Press **F12** on your keyboard
-4. Click the **"Network"** tab at the top
-5. Refresh the page (**F5**)
-6. Click any request in the list
-7. Click **"Headers"** on the right side
-8. Scroll down to find `Authorization: Bearer ey...`
-9. Copy **only** the part after "Bearer " (starts with "ey")
-10. Paste it into Settings in this app
-
-**Important:** Don't copy the word "Bearer", just the long token after it!
-
-**Note:** Keys expire after 30 minutes. Just grab a fresh one when needed (takes 10 seconds).
+**Important:** Don't copy "Bearer", just the token!  
+**Note:** Keys expire after 30 minutes - just grab a new one when needed.
 
 ---
 
-## How to Give a Company Access
+## 📋 How to Give a Company Access
 
-### Example: Adding "Acme Corporation"
+### Example: "Acme Corporation" needs access to workflows
 
 **Step 1: Find the User** (30 seconds)
 
-If John from Acme already exists:
+If John from Acme exists:
 ```
-1. Enter: john@acmecorp.com (or just "john" or "@acmecorp.com")
+1. Enter: john@acmecorp.com
 2. Click "Find Existing User"
-3. See John's card appear with his details
-4. Click on John's card to select him
-5. ✓ His company details auto-fill!
+3. See John's card with his details
+4. Click the card to select
+5. ✓ His current access auto-loads!
 ```
 
 If Acme is brand new:
 ```
 1. Enter: john@acmecorp.com
 2. Click "Create New User"
-3. Click "Find Existing User" (finds the user you just created)
-4. Click on John's card
-5. ✓ Company created and selected!
+3. Click "Find Existing User"
+4. Click John's card
+5. ✓ Company created!
 ```
 
-**Step 2: Create Their Subscription** (90 seconds)
+**Step 2: Create Subscription** (90 seconds)
 
 ```
-1. Company ID & Name are already filled in (from John's card!)
-2. Their CURRENT resources are PRE-LOADED into the form automatically!
-   • See all flows, layouts, and assets they currently have
-   • Modify permissions if needed
+1. Company ID & Name: Already filled in ✓
+2. Current Resources: Pre-loaded into form ✓
+   • See all their flows, layouts, and assets
    • Remove any (click ✕)
+   • Modify permissions
    • Add more (click "+ Add")
-3. Adjust the name: "Acme Corp - Premium"
-4. Pick duration: Click "1 Year"
+3. Name: Auto-suggested "Acmecorp - Premium Access"
+4. Duration: Click "1 Year"
 5. Click "Create Subscription"
-6. ✓ Done! Their access is updated.
+6. ✓ Done!
 ```
 
-**Perfect for:**
-- Renewing existing access (all resources pre-filled!)
-- Adding more resources (pre-filled + add new ones)
-- Modifying permissions (pre-filled, just edit)
-
-**Total time: ~2 minutes** 🚀
+**Total time: ~2 minutes**
 
 ---
 
-## Key Features
+## ✨ Key Features
 
-### 👁️ Current Access Auto-Loads Into Form
-- When you select a user, their current resources **automatically fill** Step 2
-- All flows, layouts, and assets are pre-loaded
-- See exactly what they have - modify, remove, or add more
-- Perfect for renewals - everything is already there!
-- Avoid duplicates - you can see what's already included
+### 🎯 Auto-Populate Current Access
+When you select a user:
+- ✅ Their current subscriptions appear in Step 1
+- ✅ All resources auto-fill into Step 2 form
+- ✅ Perfect for renewals (everything pre-filled!)
+- ✅ Easy to add more or modify
+- ✅ Saves 95% of time
 
-### 📋 Simple Resource Management
-- Copy resource IDs from MarineStream admin panel
-- Paste them directly into the form
-- Select Flow or Asset type
-- Set permissions (View, Start, Edit, etc.)
+### 👁️ See Current Access Grouped by Type
+```
+🔄 FLOWS (12)
+📐 LAYOUTS (3)
+📦 ASSETS (15)
+```
+Each resource shows:
+- Shortened ID (first 8 chars)
+- Permissions
+- Hover for full UUID
 
-### 📧 Work with Emails, Not IDs
-- Enter emails you know
-- Company IDs are handled behind the scenes
-- Copy/paste between steps automatically
+### 📧 Work with People, Not IDs
+- Search by email, name, or domain
+- See user cards with full details
+- Click to select
+- Company ID handled automatically
 
-### 🎨 Clean & Simple Interface
-- Apple-inspired design
+### 🎨 Clean & Simple Design
+- Apple-inspired interface
 - Two clear steps
-- No clutter or confusion
-- Works on any device
-
-### ⚡ Fast & Efficient
-- Auto-fills data between steps
-- Real-time search
-- One-click selections
-- Get things done quickly
+- No clutter
+- Auto-fills everything possible
+- Toast notifications
 
 ---
 
-## Common Tasks
+## 💡 Common Tasks
 
-### Give Multiple Companies the Same Access
+### Renew Existing Access
 
-**Scenario:** You have 5 new customers who all get the same "Basic Package"
+**Scenario:** Acme's subscription expires next month
 
 ```
-For each customer:
-1. Search for their user → Click their card
-2. Name auto-fills: "[Company] - Premium Access"
-3. Adjust to: "[Company] - Basic Package"
+1. Find John from Acme → Click card
+2. ALL their resources pre-load into Step 2 ✓
+3. Name: "Acmecorp - Renewal 2025"
 4. Duration: 1 Year
-5. Search and add the same flows/assets
-6. Create Subscription
-7. Click "Create Another"
-8. Repeat for next customer
-```
-
-**Time per customer:** ~90 seconds
-
-### Add More Access to an Existing Customer
-
-**Scenario:** Acme Corp wants access to 2 more workflows
-
-```
-1. Search for John: john@acmecorp.com
-2. Click John's card
-3. Change name to: "Acme Corp - Additional Workflows"
-4. Search for the 2 new workflows
 5. Create Subscription
+✓ Renewed in 30 seconds!
 ```
 
-They now have 2 active subscriptions with different access levels.
+### Add More Resources
 
-### Search for Multiple Users from Same Company
+**Scenario:** Acme wants 2 more workflows
 
-**Scenario:** Acme Corp has 3 employees, you want to check who exists
+```
+1. Find John → Click card
+2. Current 27 resources pre-load ✓
+3. Click "+ Add" twice
+4. Paste 2 new workflow IDs
+5. Set permissions
+6. Create Subscription
+✓ Now have 29 resources!
+```
+
+### Remove Access
+
+**Scenario:** Acme no longer needs 5 workflows
+
+```
+1. Find John → Click card
+2. All 27 resources pre-load ✓
+3. Click ✕ on the 5 they don't need
+4. Keep the other 22
+5. Create Subscription
+✓ Access updated!
+```
+
+### Change Permissions
+
+**Scenario:** Upgrade Acme from View to Edit
+
+```
+1. Find John → Click card
+2. Resources pre-load with "View, Start" ✓
+3. Change all to "View, Start, Edit"
+4. Create Subscription
+✓ Permissions upgraded!
+```
+
+### Find All Users from a Company
+
+**Scenario:** See all Acme employees
 
 ```
 1. Search: @acmecorp.com
-2. See all 3 users as cards:
-   • John Smith - john@acmecorp.com
-   • Sarah Johnson - sarah@acmecorp.com  
-   • Mike Davis - mike@acmecorp.com
-3. Click any one to create a subscription for their company
+2. See cards for:
+   • John Smith - CEO
+   • Sarah Johnson - Manager
+   • Mike Davis - Engineer
+3. Click any one to manage their company's access
 ```
 
-All users from the same company share the same Company ID.
-
-### Create a User for a New Company
-
-**Scenario:** Brand new company "NewCo Inc" with user sarah@newco.com
-
-```
-1. Enter: sarah@newco.com
-2. Click "Create New User"
-3. Click "Find Company"
-4. Create subscription as normal
-```
-
-The company is created automatically when you create the first user.
+All users from same domain share the same company & access!
 
 ---
 
-## Troubleshooting
+## 🔧 Understanding Resources
+
+### Resource Types
+- **🔄 Flow** - Workflows/processes they can run
+- **📐 Layout** - UI layouts/forms they can access
+- **📦 Asset** - Data/files they can access
+
+### Permissions
+- **View** - Can see it
+- **Start** - Can run/execute it
+- **Edit** - Can modify it
+- **Create** - Can create new instances
+- **Delete** - Can remove it
+- **Customise** - Can customize it
+- **NoCode** - No-code editing access
+
+**Common combinations:**
+- Read-only: `View`
+- Basic: `View, Start`
+- Full: `View, Start, Edit, Delete`
+
+### Resource IDs
+- Each flow/layout/asset has a unique ID (UUID)
+- Looks like: `df596c86-ee83-6aa4-bf62-1e46f847cf9a`
+- Get these from MarineStream admin panel
+- The app shows shortened versions (first 8 chars) for readability
+- Hover over any resource to see the full ID
+
+---
+
+## 📊 How Current Access Works
+
+### What You See
+
+When you select a user, the app:
+
+1. **Loads their subscriptions** from the API
+2. **Groups resources by type** (Flow, Layout, Asset)
+3. **Displays in Step 1** - so you know what they have
+4. **Pre-fills Step 2** - so you can renew/modify easily
+
+### Current Access Display
+
+```
+CURRENT ACCESS
+
+┌─ MarineStream ──────────────── [Active] ──┐
+│ Expires: 27/03/2028                        │
+│ ──────────────────────────────────────────  │
+│ 🔄 FLOWS (12)                              │
+│ df596c86    Submit, Start, Customise...   │
+│ 3eaf98b4    Submit, Start, Customise...   │
+│ (10 more...)                               │
+│                                            │
+│ 📐 LAYOUTS (3)                             │
+│ 22814a5a    View, Create, Delete...       │
+│ (2 more...)                                │
+│                                            │
+│ 📦 ASSETS (12)                             │
+│ fb8119ad    Submit, Start, Create...      │
+│ (11 more...)                               │
+└────────────────────────────────────────────┘
+```
+
+### Pre-Populated Form
+
+All those resources **automatically appear** in Step 2:
+- Correct type selected (Flow/Layout/Asset)
+- Full resource ID filled in
+- Permissions filled in
+- Ready to edit, remove, or add more
+- Plus 1 empty row for new resources
+
+---
+
+## ⚠️ Important Notes
+
+### About Companies & Users
+- **Companies** are created automatically when you add the first user
+- All users with same email domain belong to same company
+  - `john@acme.com` and `sarah@acme.com` = same company
+- **Subscriptions apply to the entire company**, not individual users
+- Selecting any user = selecting their company
+
+### About Resource Names
+- The API returns resource **IDs only** (UUIDs), not friendly names
+- We show **shortened IDs** (first 8 characters) for readability
+  - `df596c86-ee83-6aa4-bf62-1e46f847cf9a` → shows as `df596c86`
+- **Hover** over any resource to see the full UUID
+- Match IDs to names using MarineStream admin panel if needed
+
+### About Subscriptions
+- One company can have **multiple subscriptions**
+- Each subscription defines what they can access
+- New subscriptions **don't replace** old ones - they add to them
+- Old subscriptions expire naturally on their end date
+
+---
+
+## 🛠️ Troubleshooting
 
 ### "Connection blocked" or CORS errors
-
-**Problem:** Your browser blocks the connection to the API.
+**Problem:** Browser blocks API connection
 
 **Solution:**
 1. Open Terminal/Command Prompt
 2. Navigate to this folder
 3. Run: `node proxy-server.js`
 4. In Settings, change API Address to: `http://localhost:3000`
-5. Save and try again
+5. Save and retry
 
-### "No company found"
-
-**Problem:** The user doesn't exist yet.
+### "No users found"
+**Problem:** User doesn't exist yet
 
 **Solution:**
 - Click "Create New User" first
-- Then click "Find Company"
+- Then "Find Existing User"
 
 ### "API key not configured"
-
-**Problem:** You haven't set up your API key yet.
+**Problem:** Haven't set up API key
 
 **Solution:**
 - Click "Settings"
-- Follow the steps above to get your API key
-- Paste it in and save
+- Follow steps above to get API key
+- Paste and save
 
-### Where do I find resource IDs?
+### Resources not pre-loading
+**Problem:** User has no active subscriptions
 
-**Answer:** In the MarineStream admin panel
-- Each flow/asset has a unique ID
-- Usually looks like: `df596c86-ee83-6aa4-bf62-1e46f847cf9a`
-- Copy the entire ID and paste it into this app
+**Result:** Form shows 1 empty row (normal!)
+
+### Can't find resource IDs
+**Solution:**
+- Open MarineStream admin panel
+- Navigate to flows/layouts/assets
+- Copy the resource ID from there
+- Paste into app
 
 ---
 
-## Tips & Tricks
+## 💡 Tips & Tricks
 
 ### Search Flexibility
-- **Email:** `john@acmecorp.com` - finds exact user
+- **Email:** `john@acmecorp.com` - finds that specific user
 - **Name:** `John Smith` - finds by name
-- **Domain:** `@acmecorp.com` - finds all users from that company
-- **Partial:** `john` - finds anyone with "john" in name/email
+- **Domain:** `@acmecorp.com` - finds ALL users from Acme
+- **Partial:** `john` - finds anyone with "john"
 
-### Multiple Users from Same Company?
-- All users from a company (same @domain) share the same Company ID
-- Doesn't matter which user you select - subscription applies to the whole company
-- Select any user, get the company
+### Quick Renewals
+1. Find user
+2. Resources pre-load automatically
+3. Just click "Create Subscription"
+4. Done in 20 seconds!
 
-### Quick Permissions
-- Most common: `View, Start`
-- Full access: `View, Start, Edit, Delete`
-- Read-only: `View`
+### Bulk Add Same Access
+For 5 companies getting the same package:
+```
+For each company:
+1. Find their user
+2. Remove pre-loaded resources (if any)
+3. Add your standard package resources
+4. Create subscription
+5. Click "Create Another"
+Time: 90 seconds per company
+```
 
-### Duration Shortcuts
-- Testing: 1 Month
-- Trial: 3 Months
-- Standard: 1 Year
-- Enterprise: 2 Years
-
-### Search Tips
-- Search is case-insensitive
-- Partial matches work ("cust" finds "Customer Onboarding")
-- Results show both flows AND assets together
-
----
-
-## What You Need to Know
-
-### About Users & Companies
-- **Users** are actual people with email addresses
-- **Companies** are created automatically when you add the first user
-- All users with the same email domain belong to the same company
-  - `john@acme.com` and `sarah@acme.com` = same company
-- When you select a user, you're selecting their company
-- Creating a subscription for one user = **entire company** gets access
-
-### About Subscriptions
-- One company can have multiple subscriptions
-- Each subscription defines what flows/assets they can access
-- Subscriptions have an expiration date (duration)
-- You can create different subscriptions for different access levels
-
-### About Flows & Assets
-- **Flows** = Workflows/processes they can run
-- **Assets** = Data/files they can access
-- You search by name, we handle the IDs
-- Permissions define what they can do (View, Start, Edit, Delete, Create)
+### Check Before Adding
+Always review Current Access before creating:
+- Avoid duplicate resources
+- Check expiry dates
+- See what they already have
 
 ---
 
-## That's All You Need!
+## 📁 What's in This Project
 
-This app is designed to be **obvious and easy**. If you can use an iPhone, you can use this.
+```
+MsSubscriptionUI/
+├── index.html          # The app interface
+├── styles.css          # Apple-inspired design
+├── app.js              # All the logic
+├── proxy-server.js     # CORS proxy (if needed)
+├── package.json        # Dependencies
+└── README.md           # This file
+```
 
-**Questions?** Read `HOW_TO_USE.md` for detailed instructions.
-
-**Need help?** Everything you do is logged to the browser console (F12) for troubleshooting.
+**Simple and clean!**
 
 ---
 
-**Ready to start?** Open `index.html` and give someone access to MarineStream! 🚀
+## 🎯 What Makes This Special
+
+### Designed for Your Workflow
+- **You know:** Emails, names, company names
+- **You don't want to deal with:** UUIDs, technical IDs
+- **The app:** Handles all the technical stuff behind the scenes
+
+### Perfect for Renewals
+Most of your work is renewing existing subscriptions:
+- Select user
+- Current access pre-loads
+- Change duration
+- Done in 30 seconds!
+
+### Clean & Obvious
+- If you can use an iPhone, you can use this
+- No manual needed (but you're reading it anyway!)
+- Visual feedback at every step
+- Clear error messages
+
+---
+
+## 🎨 Design Philosophy
+
+### Apple-Inspired Principles
+- **Simplicity** - Only what you need, nothing more
+- **Clarity** - Obvious what to do at each step
+- **Beauty** - Polished, professional appearance
+- **Feedback** - Visual confirmation of every action
+- **Speed** - Auto-fill everything possible
+
+### User-Centric
+- Work with **people** (users), not IDs
+- See **current state** before making changes
+- **Pre-populate** forms to save time
+- **Visual grouping** (Flows, Layouts, Assets)
+- **Auto-suggest** names and values
+
+---
+
+## 📞 Need Help?
+
+### For Technical Issues
+- Check browser console (F12) for detailed error messages
+- Look for 🌐, ✅, or ❌ emoji in console logs
+- Error toasts explain what went wrong
+
+### For API Questions
+Contact Rise-X support and reference:
+- Your workspace: `marinestream`
+- Environment ID: `e9229623-b98c-5bef-8ee5-024f7e905a4c`
+
+---
+
+## 🎉 You're All Set!
+
+**Open `index.html` and start managing subscriptions!**
+
+The app is designed to be **obvious and fast**. Most workflows take under 2 minutes.
+
+**Common workflow (renewal):** 30 seconds  
+**New company setup:** 2 minutes  
+**Adding resources:** 1 minute  
+
+---
+
+**Questions?** The interface guides you through each step. **Just try it!** 🚀
