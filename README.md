@@ -54,34 +54,38 @@ Your API key lets this app talk to MarineStream on your behalf.
 
 ### Example: Adding "Acme Corporation"
 
-**Step 1: Find Their Company** (30 seconds)
+**Step 1: Find the User** (30 seconds)
 
+If John from Acme already exists:
 ```
-1. Enter any employee's email: john@acmecorp.com
-2. Click "Find Company"
-3. ✓ Company ID appears automatically
+1. Enter: john@acmecorp.com (or just "john" or "@acmecorp.com")
+2. Click "Find Existing User"
+3. See John's card appear with his details
+4. Click on John's card to select him
+5. ✓ His company details auto-fill!
 ```
 
 If Acme is brand new:
 ```
 1. Enter: john@acmecorp.com
 2. Click "Create New User"
-3. Click "Find Company"
-4. ✓ Company created and found!
+3. Click "Find Existing User" (finds the user you just created)
+4. Click on John's card
+5. ✓ Company created and selected!
 ```
 
 **Step 2: Create Their Subscription** (90 seconds)
 
 ```
-1. Company ID is already filled in (from Step 1)
-2. Enter a name: "Acme Corp - Premium"
+1. Company ID & Name are already filled in (from John's card!)
+2. Adjust the name if needed: "Acme Corp - Premium"
 3. Pick duration: Click "1 Year"
 4. Add what they can access:
    • Click "+ Add"
    • Click 🔍 button
-   • Search "Customer Onboarding"
-   • Click it to select
-   • Permissions default to "View, Start" (change if needed)
+   • Type: "Customer Onboarding"
+   • Click the workflow from search results
+   • Permissions are set to "View, Start" (adjust if needed)
    • Repeat for more flows/assets
 5. Click "Create Subscription"
 6. ✓ Done! Acme can now access those workflows.
@@ -126,12 +130,14 @@ If Acme is brand new:
 
 ```
 For each customer:
-1. Enter their email → Find Company
-2. Name: "[Company] - Basic Package"
-3. Duration: 1 Year
-4. Search and add the same flows/assets
-5. Create Subscription
-6. Repeat for next customer
+1. Search for their user → Click their card
+2. Name auto-fills: "[Company] - Premium Access"
+3. Adjust to: "[Company] - Basic Package"
+4. Duration: 1 Year
+5. Search and add the same flows/assets
+6. Create Subscription
+7. Click "Create Another"
+8. Repeat for next customer
 ```
 
 **Time per customer:** ~90 seconds
@@ -141,13 +147,29 @@ For each customer:
 **Scenario:** Acme Corp wants access to 2 more workflows
 
 ```
-1. Find their company: john@acmecorp.com
-2. Create new subscription: "Acme Corp - Additional Access"
-3. Search for the 2 new workflows
-4. Create Subscription
+1. Search for John: john@acmecorp.com
+2. Click John's card
+3. Change name to: "Acme Corp - Additional Workflows"
+4. Search for the 2 new workflows
+5. Create Subscription
 ```
 
 They now have 2 active subscriptions with different access levels.
+
+### Search for Multiple Users from Same Company
+
+**Scenario:** Acme Corp has 3 employees, you want to check who exists
+
+```
+1. Search: @acmecorp.com
+2. See all 3 users as cards:
+   • John Smith - john@acmecorp.com
+   • Sarah Johnson - sarah@acmecorp.com  
+   • Mike Davis - mike@acmecorp.com
+3. Click any one to create a subscription for their company
+```
+
+All users from the same company share the same Company ID.
 
 ### Create a User for a New Company
 
@@ -207,9 +229,16 @@ The company is created automatically when you create the first user.
 
 ## Tips & Tricks
 
-### Copy the Company ID
-- Click the "Copy ID" button in Step 1
-- It's on your clipboard, ready to paste anywhere
+### Search Flexibility
+- **Email:** `john@acmecorp.com` - finds exact user
+- **Name:** `John Smith` - finds by name
+- **Domain:** `@acmecorp.com` - finds all users from that company
+- **Partial:** `john` - finds anyone with "john" in name/email
+
+### Multiple Users from Same Company?
+- All users from a company (same @domain) share the same Company ID
+- Doesn't matter which user you select - subscription applies to the whole company
+- Select any user, get the company
 
 ### Quick Permissions
 - Most common: `View, Start`
@@ -231,10 +260,13 @@ The company is created automatically when you create the first user.
 
 ## What You Need to Know
 
-### About Companies
-- Companies are created automatically when you add a user
-- All users with the same email domain (e.g., @acmecorp.com) belong to the same company
-- You find companies by searching for any user's email from that company
+### About Users & Companies
+- **Users** are actual people with email addresses
+- **Companies** are created automatically when you add the first user
+- All users with the same email domain belong to the same company
+  - `john@acme.com` and `sarah@acme.com` = same company
+- When you select a user, you're selecting their company
+- Creating a subscription for one user = **entire company** gets access
 
 ### About Subscriptions
 - One company can have multiple subscriptions

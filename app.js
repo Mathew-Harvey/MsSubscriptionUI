@@ -13,9 +13,9 @@ const CONFIG = {
 
 // State
 const state = {
+    selectedUser: null,
     companyId: null,
-    companyName: null,
-    userEmail: null
+    companyName: null
 };
 
 // ============================================
@@ -45,10 +45,9 @@ function setupEventListeners() {
     document.getElementById('saveSettings').addEventListener('click', saveSettings);
     document.getElementById('toggleKey').addEventListener('click', toggleKeyVisibility);
 
-    // Step 1: Find Company
+    // Step 1: Find User
     document.getElementById('createUserBtn').addEventListener('click', createUser);
-    document.getElementById('findCompanyBtn').addEventListener('click', findCompany);
-    document.getElementById('copyCompanyId').addEventListener('click', copyCompanyId);
+    document.getElementById('findUserBtn').addEventListener('click', findUser);
 
     // Step 2: Create Subscription
     document.getElementById('autofillCompanyId').addEventListener('click', autofillCompanyId);
@@ -204,113 +203,179 @@ async function apiCall(endpoint, method = 'GET', body = null) {
 }
 
 // ============================================
-// STEP 1: FIND COMPANY
+// STEP 1: FIND USER
 // ============================================
 
 async function createUser() {
-    const email = document.getElementById('userEmail').value.trim();
+    const searchTerm = document.getElementById('userSearch').value.trim();
     
-    if (!email || !validateEmail(email)) {
-        showToast('Please enter a valid email address', 'error');
+    if (!searchTerm) {
+        showToast('Please enter an email address', 'error');
         return;
     }
 
-    state.userEmail = email;
+    // Validate it's an email
+    if (!validateEmail(searchTerm)) {
+        showToast('Please enter a valid email address for new users', 'error');
+        return;
+    }
+
     showToast('Creating user...', 'info');
 
     try {
-        const endpoint = `/api/v3/user/userPlaceholder/${encodeURIComponent(email)}?isGroup=false`;
-        await apiCall(endpoint, 'POST', {});
+        const endpoint = `/api/v3/user/userPlaceholder/${encodeURIComponent(searchTerm)}?isGroup=false`;
+        const result = await apiCall(endpoint, 'POST', {});
         
-        showToast('User created! Now finding company...', 'success');
+        showToast('User created! Now searching...', 'success');
         
-        // Automatically find company after creating user
-        setTimeout(() => findCompany(), 500);
+        // Automatically search after creating user
+        setTimeout(() => findUser(), 800);
         
     } catch (error) {
         console.error('User creation error:', error);
     }
 }
 
-async function findCompany() {
-    const email = document.getElementById('userEmail').value.trim();
+async function findUser() {
+    const searchTerm = document.getElementById('userSearch').value.trim();
     
-    if (!email || !validateEmail(email)) {
-        showToast('Please enter a valid email address', 'error');
+    if (!searchTerm) {
+        showToast('Please enter a search term', 'error');
         return;
     }
 
-    const domain = email.split('@')[1];
-    state.userEmail = email;
-    
-    showToast('Searching for company...', 'info');
+    showToast('Searching for users...', 'info');
 
     try {
-        const endpoint = `/api/v3/user/search?searchString=@${domain}`;
+        const endpoint = `/api/v3/user/search?searchString=${encodeURIComponent(searchTerm)}`;
         const result = await apiCall(endpoint, 'GET');
         
-        // Extract company ID from response
-        let companyId = null;
-        let users = result.data || result;
+        // Extract users from response
+        let users = result.data || result.users || result;
         
         if (!Array.isArray(users)) {
-            users = [users];
+            users = users ? [users] : [];
         }
         
-        if (users.length > 0 && users[0].companyId) {
-            companyId = users[0].companyId;
-        }
-        
-        if (!companyId) {
-            throw new Error('No company found. Try creating the user first.');
+        if (users.length === 0) {
+            showToast('No users found. Try creating the user first.', 'warning');
+            document.getElementById('userResults').style.display = 'none';
+            return;
         }
 
-        // Extract company name from email domain
-        const companyName = domain.split('.')[0].charAt(0).toUpperCase() + domain.split('.')[0].slice(1);
-        
-        // Store in state
-        state.companyId = companyId;
-        state.companyName = companyName;
-
-        // Display result
-        document.getElementById('companyName').textContent = companyName;
-        document.getElementById('companyId').textContent = companyId;
-        document.getElementById('companyResult').style.display = 'block';
-        
-        showToast('Company found!', 'success');
-        
-        // Smooth scroll to step 2
-        setTimeout(() => {
-            document.querySelector('.card:nth-child(2)').scrollIntoView({ 
-                behavior: 'smooth', 
-                block: 'start' 
-            });
-        }, 500);
+        // Display user cards
+        displayUserResults(users);
+        showToast(`Found ${users.length} user${users.length > 1 ? 's' : ''}`, 'success');
         
     } catch (error) {
-        console.error('Company search error:', error);
+        console.error('User search error:', error);
+        document.getElementById('userResults').style.display = 'none';
     }
 }
 
-function copyCompanyId() {
-    const companyId = document.getElementById('companyId').textContent;
-    navigator.clipboard.writeText(companyId).then(() => {
-        showToast('Company ID copied!', 'success');
-    }).catch(() => {
-        showToast('Could not copy to clipboard', 'error');
+function displayUserResults(users) {
+    const container = document.getElementById('userCards');
+    const resultsDiv = document.getElementById('userResults');
+    const countEl = document.getElementById('resultsCount');
+    
+    countEl.textContent = `${users.length} user${users.length > 1 ? 's' : ''} found`;
+    
+    container.innerHTML = users.map((user, index) => {
+        const userName = user.displayName || user.name || user.email?.split('@')[0] || 'User';
+        const userEmail = user.email || 'No email';
+        const companyName = user.companyName || extractCompanyName(userEmail);
+        const companyId = user.companyId || 'Unknown';
+        
+        return `
+            <div class="user-card" data-index="${index}">
+                <div class="user-card-header">
+                    <div class="user-card-name">${userName}</div>
+                    <div class="user-card-badge">User</div>
+                </div>
+                <div class="user-card-email">${userEmail}</div>
+                <div class="user-card-company">
+                    <div class="user-card-field">
+                        <span class="user-card-label">Company</span>
+                        <span class="user-card-value">${companyName}</span>
+                    </div>
+                    <div class="user-card-field">
+                        <span class="user-card-label">Company ID</span>
+                        <span class="user-card-value mono">${companyId.substring(0, 12)}...</span>
+                    </div>
+                </div>
+            </div>
+        `;
+    }).join('');
+    
+    // Show results
+    resultsDiv.style.display = 'block';
+    
+    // Add click handlers
+    container.querySelectorAll('.user-card').forEach((card, index) => {
+        card.addEventListener('click', () => {
+            selectUser(users[index], card);
+        });
     });
 }
 
-// ============================================
-// STEP 2: CREATE SUBSCRIPTION
-// ============================================
+function selectUser(user, cardElement) {
+    state.selectedUser = user;
+    state.companyId = user.companyId;
+    state.companyName = user.companyName || extractCompanyName(user.email);
+    
+    // Visual feedback - mark as selected
+    document.querySelectorAll('.user-card').forEach(c => c.classList.remove('selected'));
+    cardElement.classList.add('selected');
+    
+    // Display selection
+    const userName = user.displayName || user.name || user.email?.split('@')[0] || 'User';
+    document.getElementById('selectedUserName').textContent = userName;
+    document.getElementById('selectedUserEmail').textContent = user.email || 'No email';
+    document.getElementById('selectedCompanyName').textContent = state.companyName;
+    document.getElementById('selectedCompanyId').textContent = state.companyId;
+    document.getElementById('selectedUserBox').style.display = 'block';
+    
+    // Auto-fill subscription form
+    document.getElementById('subscriptionCompanyId').value = state.companyId;
+    
+    // Auto-suggest subscription name
+    const suggestedName = `${state.companyName} - Premium Access`;
+    const nameInput = document.getElementById('subscriptionName');
+    if (!nameInput.value) {
+        nameInput.value = suggestedName;
+    }
+    
+    showToast(`Selected: ${userName}`, 'success');
+    
+    // Scroll to step 2
+    setTimeout(() => {
+        document.querySelector('.card:nth-child(2)').scrollIntoView({ 
+            behavior: 'smooth', 
+            block: 'start' 
+        });
+    }, 300);
+}
+
+function extractCompanyName(email) {
+    if (!email || !email.includes('@')) return 'Unknown Company';
+    const domain = email.split('@')[1];
+    const name = domain.split('.')[0];
+    return name.charAt(0).toUpperCase() + name.slice(1);
+}
 
 function autofillCompanyId() {
     if (state.companyId) {
         document.getElementById('subscriptionCompanyId').value = state.companyId;
-        showToast('Company ID filled from Step 1', 'success');
+        
+        // Also fill subscription name if empty
+        const nameInput = document.getElementById('subscriptionName');
+        if (!nameInput.value && state.companyName) {
+            nameInput.value = `${state.companyName} - Premium Access`;
+        }
+        
+        showToast('Company details filled from Step 1', 'success');
     } else {
-        showToast('Please complete Step 1 first', 'warning');
+        showToast('Please select a user from Step 1 first', 'warning');
     }
 }
 
@@ -486,30 +551,40 @@ async function createSubscription(e) {
     // Collect resources
     const resourceRows = document.querySelectorAll('.resource-row');
     const resources = [];
+    let hasError = false;
 
     resourceRows.forEach(row => {
+        if (hasError) return;
+        
         const type = row.querySelector('.resource-type').value;
         const originId = row.querySelector('.resource-id').value.trim(); // Hidden input
         const permissionsText = row.querySelector('.resource-permissions').value.trim();
         const name = row.querySelector('.resource-name').value.trim();
 
-        if (!originId) {
-            showToast('Please search and select all flows/assets', 'error');
+        if (!name || !originId) {
+            showToast('Please search and select all flows/assets (click 🔍)', 'error');
+            hasError = true;
             return;
         }
 
-        if (originId && permissionsText) {
-            const features = permissionsText.split(',').map(p => p.trim()).filter(p => p);
-            resources.push({
-                originId: originId,
-                type: type,
-                features: features
-            });
+        if (!permissionsText) {
+            showToast('Please enter permissions for all resources', 'error');
+            hasError = true;
+            return;
         }
+
+        const features = permissionsText.split(',').map(p => p.trim()).filter(p => p);
+        resources.push({
+            originId: originId,
+            type: type,
+            features: features
+        });
     });
 
+    if (hasError) return;
+
     if (resources.length === 0) {
-        showToast('Please add at least one resource (flow or asset)', 'error');
+        showToast('Please add at least one resource (click + Add)', 'error');
         return;
     }
 
@@ -564,11 +639,25 @@ async function createSubscription(e) {
 }
 
 function resetForm() {
+    // Reset state
+    state.selectedUser = null;
+    state.companyId = null;
+    state.companyName = null;
+    
+    // Reset search
+    document.getElementById('userSearch').value = '';
+    document.getElementById('userResults').style.display = 'none';
+    document.getElementById('selectedUserBox').style.display = 'none';
+    
     // Reset form
     document.getElementById('subscriptionForm').reset();
     document.getElementById('subscriptionForm').style.display = 'block';
     document.getElementById('subscriptionResult').style.display = 'none';
     document.getElementById('durationDays').value = 365;
+    
+    // Reset active pill
+    document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+    document.querySelector('.pill[data-days="365"]').classList.add('active');
     
     // Reset resources list
     const list = document.getElementById('resourcesList');
@@ -577,6 +666,8 @@ function resetForm() {
     
     // Scroll to top
     window.scrollTo({ top: 0, behavior: 'smooth' });
+    
+    showToast('Ready for new subscription', 'info');
 }
 
 // ============================================

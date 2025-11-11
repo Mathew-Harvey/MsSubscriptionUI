@@ -28,18 +28,22 @@
 
 ## Adding a Subscription (2 Minutes)
 
-### Step 1: Find the Company (30 seconds)
+### Step 1: Find the User (30 seconds)
 
 **If it's a NEW customer:**
 1. Enter their email: `sarah@newcompany.com`
 2. Click **"Create New User"**
-3. Click **"Find Company"**
-4. ✓ Company ID appears!
+3. Click **"Find Existing User"**
+4. See Sarah's user card appear
+5. Click on her card to select
+6. ✓ Company details auto-fill into Step 2!
 
 **If they ALREADY exist:**
-1. Enter any user's email from that company
-2. Click **"Find Company"**
-3. ✓ Company ID appears!
+1. Enter their email (or just name, or company domain)
+2. Click **"Find Existing User"**
+3. See all matching users as cards
+4. Click the one you want
+5. ✓ Company details auto-fill into Step 2!
 
 ---
 
@@ -64,16 +68,23 @@
 
 ### Step 1
 ```
-Email: john@acmecorp.com
-→ Click "Find Company"
-→ Company: Acmecorp
-→ Company ID: abc-123-xyz-789
+Search: john@acmecorp.com
+→ Click "Find Existing User"
+→ See John's card:
+   ┌─────────────────────────────┐
+   │ John Smith          [USER]  │
+   │ john@acmecorp.com           │
+   │ Company: Acmecorp           │
+   │ Company ID: abc-123...      │
+   └─────────────────────────────┘
+→ Click on the card
+→ ✓ Selected! Details appear below
 ```
 
 ### Step 2
 ```
-Company ID: [auto-filled]
-Name: Acme Corp - Basic Access
+Company ID: abc-123-xyz-789 [auto-filled from John's card!]
+Name: Acmecorp - Premium Access [auto-suggested!]
 Duration: 1 Year (click the pill)
 
 Resources:

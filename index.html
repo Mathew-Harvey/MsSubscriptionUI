@@ -52,25 +52,26 @@
 
     <!-- Main Container -->
     <div class="container">
-        <!-- Step 1: Find Company -->
+        <!-- Step 1: Find User -->
         <section class="card">
             <div class="card-header">
                 <div class="step-badge">1</div>
                 <div>
-                    <h2>Find Company</h2>
-                    <p class="subtitle">Search by email to get the company ID</p>
+                    <h2>Find User</h2>
+                    <p class="subtitle">Search by email or name to find users and their company</p>
                 </div>
             </div>
 
             <div class="card-body">
                 <div class="input-group">
-                    <label>User Email Address</label>
+                    <label>Search for User</label>
                     <input 
-                        type="email" 
-                        id="userEmail" 
-                        placeholder="john@acmecorp.com"
+                        type="text" 
+                        id="userSearch" 
+                        placeholder="Enter email or name (e.g., john@acmecorp.com or John Smith)"
                         class="input-large"
                     >
+                    <p class="hint">You can search by email address, name, or company domain (@acmecorp.com)</p>
                 </div>
 
                 <div class="button-row">
@@ -78,29 +79,47 @@
                         <span class="btn-icon">👤</span>
                         Create New User
                     </button>
-                    <button class="btn-primary" id="findCompanyBtn">
+                    <button class="btn-primary" id="findUserBtn">
                         <span class="btn-icon">🔍</span>
-                        Find Company
+                        Find Existing User
                     </button>
                 </div>
 
-                <!-- Result -->
-                <div class="result-box" id="companyResult" style="display: none;">
+                <!-- User Results -->
+                <div id="userResults" style="display: none; margin-top: 32px;">
+                    <div class="results-header">
+                        <h3>Select a User</h3>
+                        <p class="results-count" id="resultsCount"></p>
+                    </div>
+                    <div class="user-cards" id="userCards">
+                        <!-- User cards will be added here dynamically -->
+                    </div>
+                </div>
+
+                <!-- Selected User Display -->
+                <div class="result-box" id="selectedUserBox" style="display: none;">
                     <div class="result-header">
                         <span class="result-icon">✓</span>
-                        <span class="result-title">Company Found</span>
+                        <span class="result-title">User Selected</span>
                     </div>
                     <div class="result-content">
                         <div class="result-item">
+                            <span class="result-label">User</span>
+                            <span class="result-value" id="selectedUserName"></span>
+                        </div>
+                        <div class="result-item">
+                            <span class="result-label">Email</span>
+                            <span class="result-value" id="selectedUserEmail"></span>
+                        </div>
+                        <div class="result-item">
                             <span class="result-label">Company</span>
-                            <span class="result-value" id="companyName"></span>
+                            <span class="result-value" id="selectedCompanyName"></span>
                         </div>
                         <div class="result-item">
                             <span class="result-label">Company ID</span>
-                            <span class="result-value mono" id="companyId"></span>
+                            <span class="result-value mono" id="selectedCompanyId"></span>
                         </div>
                     </div>
-                    <button class="btn-copy" id="copyCompanyId">Copy ID</button>
                 </div>
             </div>
         </section>
